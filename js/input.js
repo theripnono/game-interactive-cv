@@ -23,11 +23,11 @@ function handleKeyDown(event) {
             event.preventDefault();
             return;
         }
-        // No procesar otras teclas cuando el chat está abierto
-        if (event.target !== chatInput) {
-            event.preventDefault();
-            return;
+        // Si el foco está en el input del chat, no procesar teclas de movimiento
+        if (event.target === chatInput) {
+            return; // Permitir comportamiento normal del input
         }
+        // Si no está en el input, procesar normalmente las teclas de movimiento
     }
     
     // Manejar tecla de espacio para interacción

@@ -75,10 +75,36 @@ function addMessage(text, sender = 'user') {
  * Simula la respuesta del círculo azul
  * @param {string} userMessage - Mensaje del usuario
  */
-function generateBotResponse(userMessage) {
-    setTimeout(() => {
-        addMessage("Entendido", "bot");
-    }, CHAT_CONFIG.botResponseDelay);
+async function generateBotResponse(userMessage) {
+    try {
+        // Mostrar indicador de carga
+        const loadingMessage = addMessage("Pensando... 🤔", "bot");
+        
+        const response = await fetch('/api/claude', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: userMessage
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Remover mensaje de carga
+        loadingMessage.remove();
+        
+        if (data.success) {
+            addMessage(data.message, "bot");
+        } else {
+            addMessage("¡Oops! Algo salió mal. Intenta de nuevo.", "bot");
+        }
+        
+    } catch (error) {
+        console.error('Error al comunicarse con Claude:', error);
+        addMessage("No puedo conectarme ahora. ¿Intentamos más tarde? 🔵", "bot");
+    }
 }
 
 /**
