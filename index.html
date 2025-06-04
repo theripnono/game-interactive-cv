@@ -14,6 +14,18 @@
             <span class="key-hint">W</span> <span class="key-hint">A</span> <span class="key-hint">S</span> <span class="key-hint">D</span> keys or 
             <span class="key-hint">↑</span> <span class="key-hint">←</span> <span class="key-hint">↓</span> <span class="key-hint">→</span> arrow keys
         </p>
+        <p>When touching the blue circle, press <span class="key-hint">SPACE</span> to interact</p>
+    </div>
+
+    <!-- Indicador de interacción -->
+    <div id="interactionHint" class="interaction-hint hidden">Press SPACE to interact</div>
+
+    <!-- Diálogo de interacción -->
+    <div id="dialogBox" class="dialog-box hidden">
+        <div class="dialog-content">
+            <p id="dialogText">Hola, soy el círculo azul</p>
+            <button id="closeDialog" class="dialog-button">Cerrar</button>
+        </div>
     </div>
 
     <canvas id="gameCanvas" width="800" height="600"></canvas>

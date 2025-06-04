@@ -2,6 +2,17 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const positionDisplay = document.getElementById('position');
+const dialogBox = document.getElementById('dialogBox');
+const dialogText = document.getElementById('dialogText');
+const closeDialogBtn = document.getElementById('closeDialog');
+const interactionHint = document.getElementById('interactionHint');
+
+// Estado del juego
+const gameState = {
+    isPaused: false,
+    canInteract: false,
+    dialogOpen: false
+};
 
 // Propiedades del círculo rojo (controlado por el jugador)
 const redCircle = {
@@ -23,7 +34,7 @@ const blueCircle = {
     targetX: 0,
     targetY: 0,
     isMoving: false,
-    speed: 5, // Velocidad alta para movimientos largos
+    speed: 8, // Velocidad alta para movimientos largos
     waitTimer: 0,
     waitInterval: 300, // 5 segundos a 60 FPS (5 * 60 = 300 frames)
     minDistance: 150, // Distancia mínima para los saltos
@@ -39,7 +50,8 @@ const keys = {
     ArrowUp: false,
     ArrowLeft: false,
     ArrowDown: false,
-    ArrowRight: false
+    ArrowRight: false,
+    space: false
 };
 
 /**
@@ -48,6 +60,16 @@ const keys = {
  */
 function handleKeyDown(event) {
     const key = event.key.toLowerCase();
+    
+    // Manejar tecla de espacio para interacción
+    if (event.key === ' ' || event.key === 'Spacebar') {
+        if (!keys.space && gameState.canInteract && !gameState.dialogOpen) {
+            keys.space = true;
+            openDialog();
+        }
+        event.preventDefault();
+        return;
+    }
     
     if (keys.hasOwnProperty(key) || keys.hasOwnProperty(event.key)) {
         if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
@@ -65,6 +87,12 @@ function handleKeyDown(event) {
  */
 function handleKeyUp(event) {
     const key = event.key.toLowerCase();
+    
+    // Manejar liberación de tecla de espacio
+    if (event.key === ' ' || event.key === 'Spacebar') {
+        keys.space = false;
+        return;
+    }
     
     if (keys.hasOwnProperty(key) || keys.hasOwnProperty(event.key)) {
         if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
@@ -145,6 +173,11 @@ function generateNewTarget() {
  * Actualiza la posición del círculo azul con movimiento por intervalos
  */
 function updateBlueCirclePosition() {
+    // Si el juego está pausado (diálogo abierto), no actualizar el círculo azul
+    if (gameState.isPaused) {
+        return;
+    }
+    
     if (!blueCircle.isMoving) {
         // Círculo está esperando - incrementar temporizador
         blueCircle.waitTimer++;
@@ -206,11 +239,19 @@ function applyBoundaryConstraints(circle) {
  */
 function updatePositionDisplay() {
     const timeRemaining = Math.ceil((blueCircle.waitInterval - blueCircle.waitTimer) / 60);
-    const blueStatus = blueCircle.isMoving ? "Moving" : `Waiting (${timeRemaining}s)`;
+    let blueStatus;
+    
+    if (gameState.isPaused) {
+        blueStatus = "Paused (Dialog open)";
+    } else {
+        blueStatus = blueCircle.isMoving ? "Moving" : `Waiting (${timeRemaining}s)`;
+    }
+    
+    const interactionStatus = gameState.canInteract ? " | Can interact!" : "";
     
     positionDisplay.innerHTML = `
         Red Circle - X: ${Math.round(redCircle.x)}, Y: ${Math.round(redCircle.y)}<br>
-        Blue Circle - X: ${Math.round(blueCircle.x)}, Y: ${Math.round(blueCircle.y)} | Status: ${blueStatus}
+        Blue Circle - X: ${Math.round(blueCircle.x)}, Y: ${Math.round(blueCircle.y)} | Status: ${blueStatus}${interactionStatus}
     `;
 }
 
@@ -259,35 +300,62 @@ function detectCollision(circle1, circle2) {
 }
 
 /**
+ * Abre el diálogo de interacción
+ */
+function openDialog() {
+    gameState.dialogOpen = true;
+    gameState.isPaused = true;
+    dialogBox.classList.remove('hidden');
+    interactionHint.classList.add('hidden');
+}
+
+/**
+ * Cierra el diálogo de interacción
+ */
+function closeDialog() {
+    gameState.dialogOpen = false;
+    gameState.isPaused = false;
+    dialogBox.classList.add('hidden');
+    canvas.focus(); // Devolver el foco al canvas para los controles del teclado
+}
+
+/**
+ * Actualiza el estado de interacción entre círculos
+ */
+function updateInteractionState() {
+    const collision = detectCollision(redCircle, blueCircle);
+    
+    if (collision && !gameState.dialogOpen) {
+        gameState.canInteract = true;
+        interactionHint.classList.remove('hidden');
+    } else if (!collision) {
+        gameState.canInteract = false;
+        interactionHint.classList.add('hidden');
+    }
+}
+
+/**
  * Maneja la colisión entre círculos
  */
 function handleCollisions() {
     if (detectCollision(redCircle, blueCircle)) {
-        // Si el círculo azul está parado, forzar un nuevo movimiento inmediatamente
-        if (!blueCircle.isMoving) {
-            generateNewTarget();
-            blueCircle.isMoving = true;
-            blueCircle.waitTimer = 0;
-        }
-        
         // Separar los círculos para evitar que se queden pegados
+        // SOLO afecta al círculo rojo, el azul mantiene su comportamiento independiente
         const dx = redCircle.x - blueCircle.x;
         const dy = redCircle.y - blueCircle.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance > 0) {
             const overlap = (redCircle.radius + blueCircle.radius) - distance;
-            const separationX = (dx / distance) * (overlap / 2);
-            const separationY = (dy / distance) * (overlap / 2);
+            const separationX = (dx / distance) * overlap;
+            const separationY = (dy / distance) * overlap;
             
-            blueCircle.x -= separationX;
-            blueCircle.y -= separationY;
+            // Solo mover el círculo rojo para separarlo del azul
             redCircle.x += separationX;
             redCircle.y += separationY;
             
-            // Aplicar restricciones de límites después de la separación
+            // Aplicar restricciones de límites solo al círculo rojo
             applyBoundaryConstraints(redCircle);
-            applyBoundaryConstraints(blueCircle);
         }
     }
 }
@@ -298,6 +366,7 @@ function handleCollisions() {
 function updateGame() {
     updateRedCirclePosition();
     updateBlueCirclePosition();
+    updateInteractionState();
     handleCollisions();
 }
 
@@ -318,6 +387,9 @@ function initializeGame() {
     // Configurar event listeners para el teclado
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
+    
+    // Configurar event listener para cerrar el diálogo
+    closeDialogBtn.addEventListener('click', closeDialog);
     
     // Configurar el canvas para recibir el foco del teclado
     canvas.setAttribute('tabindex', '0');

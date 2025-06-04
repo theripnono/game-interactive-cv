@@ -1,4 +1,24 @@
-/* Reset y estilos base */
+/* Responsive design */
+@media (max-width: 900px) {
+    canvas {
+        width: 90vw;
+        height: auto;
+    }
+    
+    .instructions {
+        max-width: 90vw;
+        padding: 12px;
+    }
+    
+    body {
+        padding: 15px;
+    }
+    
+    .dialog-content {
+        padding: 20px;
+        max-width: 90vw;
+    }
+}/* Reset y estilos base */
 body {
     margin: 0;
     padding: 20px;
@@ -68,19 +88,94 @@ canvas:hover {
     transition: box-shadow 0.3s ease;
 }
 
-/* Responsive design */
-@media (max-width: 900px) {
-    canvas {
-        width: 90vw;
-        height: auto;
+/* Estilos para el diálogo de interacción */
+.dialog-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
+.dialog-box.hidden {
+    display: none;
+}
+
+.dialog-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    animation: dialogAppear 0.3s ease-out;
+}
+
+@keyframes dialogAppear {
+    from {
+        transform: scale(0.7);
+        opacity: 0;
     }
-    
-    .instructions {
-        max-width: 90vw;
-        padding: 12px;
+    to {
+        transform: scale(1);
+        opacity: 1;
     }
-    
-    body {
-        padding: 15px;
-    }
+}
+
+.dialog-content p {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.dialog-button {
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.dialog-button:hover {
+    background-color: #0052cc;
+    transform: translateY(-1px);
+}
+
+.dialog-button:active {
+    transform: translateY(0);
+}
+
+/* Indicador de interacción */
+.interaction-hint {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+    transition: opacity 0.3s ease;
+    z-index: 100;
+}
+
+.interaction-hint.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
