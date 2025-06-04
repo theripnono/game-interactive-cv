@@ -19,7 +19,7 @@ function openChat() {
     setDialogState(true);
     dialogBox.classList.remove('hidden');
     hideInteractionHint();
-    
+
     // Enfocar el input de chat
     setTimeout(() => {
         chatInput.focus();
@@ -57,16 +57,16 @@ function hideInteractionHint() {
 function addMessage(text, sender = 'user') {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}-message`;
-    
+
     const senderName = sender === 'user' ? 'Tú' : 'Círculo Azul';
-    
+
     messageDiv.innerHTML = `
         <span class="message-sender">${senderName}:</span>
         <span class="message-text">${text}</span>
     `;
-    
+
     chatMessages.appendChild(messageDiv);
-    
+
     // Scroll automático hacia abajo
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -79,7 +79,7 @@ async function generateBotResponse(userMessage) {
     try {
         // Mostrar indicador de carga
         const loadingMessage = addMessage("Pensando... 🤔", "bot");
-        
+
         const response = await fetch('/api/claude', {
             method: 'POST',
             headers: {
@@ -89,18 +89,18 @@ async function generateBotResponse(userMessage) {
                 message: userMessage
             })
         });
-        
+
         const data = await response.json();
-        
+
         // Remover mensaje de carga
-        loadingMessage.remove();
-        
+        //loadingMessage.remove();
+
         if (data.success) {
             addMessage(data.message, "bot");
         } else {
             addMessage("¡Oops! Algo salió mal. Intenta de nuevo.", "bot");
         }
-        
+
     } catch (error) {
         console.error('Error al comunicarse con Claude:', error);
         addMessage("No puedo conectarme ahora. ¿Intentamos más tarde? 🔵", "bot");
@@ -112,17 +112,17 @@ async function generateBotResponse(userMessage) {
  */
 function sendMessage() {
     const message = chatInput.value.trim();
-    
+
     if (message === '') {
         return;
     }
-    
+
     // Añadir mensaje del usuario
     addMessage(message, 'user');
-    
+
     // Limpiar input
     chatInput.value = '';
-    
+
     // Generar respuesta del bot
     generateBotResponse(message);
 }
