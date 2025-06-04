@@ -3,8 +3,11 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const positionDisplay = document.getElementById('position');
 const dialogBox = document.getElementById('dialogBox');
-const dialogText = document.getElementById('dialogText');
-const closeDialogBtn = document.getElementById('closeDialog');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendMessageBtn = document.getElementById('sendMessage');
+const closeChatBtn = document.getElementById('closeChatBtn');
+const closeChatFooterBtn = document.getElementById('closeChat');
 const interactionHint = document.getElementById('interactionHint');
 
 // Estado del juego
@@ -61,11 +64,31 @@ const keys = {
 function handleKeyDown(event) {
     const key = event.key.toLowerCase();
     
-    // Manejar tecla de espacio para interacción
+    // Manejar teclas ESC y ENTER para cerrar el chat
+    if (gameState.dialogOpen) {
+        if (event.key === 'Escape') {
+            closeChat();
+            event.preventDefault();
+            return;
+        }
+        // ENTER en el input para enviar mensaje
+        if (event.key === 'Enter' && event.target === chatInput) {
+            sendMessage();
+            event.preventDefault();
+            return;
+        }
+        // No procesar otras teclas de movimiento cuando el chat está abierto
+        if (event.target !== chatInput) {
+            event.preventDefault();
+            return;
+        }
+    }
+    
+    // Manejar tecla de espacio para interacción (solo si el chat no está abierto)
     if (event.key === ' ' || event.key === 'Spacebar') {
         if (!keys.space && gameState.canInteract && !gameState.dialogOpen) {
             keys.space = true;
-            openDialog();
+            openChat();
         }
         event.preventDefault();
         return;
@@ -287,7 +310,24 @@ function clearCanvas() {
 }
 
 /**
- * Detecta colisión entre dos círculos
+ * Detecta si dos círculos están en proximidad para interactuar
+ * @param {Object} circle1 - Primer círculo
+ * @param {Object} circle2 - Segundo círculo
+ * @param {number} threshold - Distancia máxima para considerar proximidad (en píxeles)
+ * @returns {boolean} - True si están en proximidad, false si no
+ */
+function detectProximity(circle1, circle2, threshold = 1) {
+    const dx = circle1.x - circle2.x;
+    const dy = circle1.y - circle2.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const minDistance = circle1.radius + circle2.radius;
+    
+    // Están en proximidad si la distancia entre bordes es menor o igual al threshold
+    return (distance - minDistance) <= threshold;
+}
+
+/**
+ * Detecta colisión entre dos círculos (para la separación física)
  * @param {Object} circle1 - Primer círculo
  * @param {Object} circle2 - Segundo círculo
  * @returns {boolean} - True si hay colisión, false si no
@@ -300,19 +340,24 @@ function detectCollision(circle1, circle2) {
 }
 
 /**
- * Abre el diálogo de interacción
+ * Abre el chat de interacción
  */
-function openDialog() {
+function openChat() {
     gameState.dialogOpen = true;
     gameState.isPaused = true;
     dialogBox.classList.remove('hidden');
     interactionHint.classList.add('hidden');
+    
+    // Enfocar el input de chat
+    setTimeout(() => {
+        chatInput.focus();
+    }, 100);
 }
 
 /**
- * Cierra el diálogo de interacción
+ * Cierra el chat de interacción
  */
-function closeDialog() {
+function closeChat() {
     gameState.dialogOpen = false;
     gameState.isPaused = false;
     dialogBox.classList.add('hidden');
@@ -320,15 +365,68 @@ function closeDialog() {
 }
 
 /**
+ * Añade un mensaje al chat
+ * @param {string} text - Texto del mensaje
+ * @param {string} sender - 'user' o 'bot'
+ */
+function addMessage(text, sender = 'user') {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    const senderName = sender === 'user' ? 'Tú' : 'Círculo Azul';
+    
+    messageDiv.innerHTML = `
+        <span class="message-sender">${senderName}:</span>
+        <span class="message-text">${text}</span>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    
+    // Scroll automático hacia abajo
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/**
+ * Simula la respuesta del círculo azul
+ * @param {string} userMessage - Mensaje del usuario
+ */
+function generateBotResponse(userMessage) {
+    // Por ahora, respuesta mock simple
+    setTimeout(() => {
+        addMessage("Entendido", "bot");
+    }, 500); // Simular un pequeño delay de respuesta
+}
+
+/**
+ * Envía un mensaje en el chat
+ */
+function sendMessage() {
+    const message = chatInput.value.trim();
+    
+    if (message === '') {
+        return; // No enviar mensajes vacíos
+    }
+    
+    // Añadir mensaje del usuario
+    addMessage(message, 'user');
+    
+    // Limpiar input
+    chatInput.value = '';
+    
+    // Generar respuesta del bot
+    generateBotResponse(message);
+}
+
+/**
  * Actualiza el estado de interacción entre círculos
  */
 function updateInteractionState() {
-    const collision = detectCollision(redCircle, blueCircle);
+    const proximity = detectProximity(redCircle, blueCircle, 1); // 1 píxel de separación
     
-    if (collision && !gameState.dialogOpen) {
+    if (proximity && !gameState.dialogOpen) {
         gameState.canInteract = true;
         interactionHint.classList.remove('hidden');
-    } else if (!collision) {
+    } else if (!proximity) {
         gameState.canInteract = false;
         interactionHint.classList.add('hidden');
     }
@@ -388,8 +486,13 @@ function initializeGame() {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
     
-    // Configurar event listener para cerrar el diálogo
-    closeDialogBtn.addEventListener('click', closeDialog);
+    // Configurar event listeners para el chat
+    sendMessageBtn.addEventListener('click', sendMessage);
+    closeChatBtn.addEventListener('click', closeChat);
+    closeChatFooterBtn.addEventListener('click', closeChat);
+    
+    // Event listener para enviar mensaje con Enter
+    chatInput.addEventListener('keydown', handleKeyDown);
     
     // Configurar el canvas para recibir el foco del teclado
     canvas.setAttribute('tabindex', '0');
