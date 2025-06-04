@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movable Red Circle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="instructions">
+        <h3>Controls:</h3>
+        <p>Move the red circle using:</p>
+        <p>
+            <span class="key-hint">W</span> <span class="key-hint">A</span> <span class="key-hint">S</span> <span class="key-hint">D</span> keys or 
+            <span class="key-hint">↑</span> <span class="key-hint">←</span> <span class="key-hint">↓</span> <span class="key-hint">→</span> arrow keys
+        </p>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div class="controls">
+        <p>Position: <span id="position">X: 400, Y: 300</span></p>
+    </div>
+
+    <script src="actions.js"></script>
+</body>
+</html>

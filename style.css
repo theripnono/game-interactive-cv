@@ -1,0 +1,86 @@
+/* Reset y estilos base */
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Estilos del canvas */
+canvas {
+    border: 2px solid #333;
+    background-color: white;
+    cursor: crosshair;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Sección de controles */
+.controls {
+    margin-top: 15px;
+    text-align: center;
+    color: #333;
+    font-size: 16px;
+}
+
+/* Sección de instrucciones */
+.instructions {
+    background-color: #e8e8e8;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-width: 600px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.instructions h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.instructions p {
+    margin: 8px 0;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* Estilos para las teclas */
+.key-hint {
+    display: inline-block;
+    background-color: #ddd;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin: 0 3px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid #bbb;
+    box-shadow: 0 2px 0 #bbb;
+    color: #333;
+}
+
+/* Efectos hover para mejor UX */
+canvas:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 900px) {
+    canvas {
+        width: 90vw;
+        height: auto;
+    }
+    
+    .instructions {
+        max-width: 90vw;
+        padding: 12px;
+    }
+    
+    body {
+        padding: 15px;
+    }
+}
