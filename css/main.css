@@ -1,0 +1,9 @@
+/* Archivo principal que importa todos los módulos CSS */
+@import url('./base.css');
+@import url('./canvas.css');
+@import url('./instructions.css');
+@import url('./dialog.css');
+@import url('./chat.css');
+@import url('./buttons.css');
+@import url('./notifications.css');
+@import url('./responsive.css');

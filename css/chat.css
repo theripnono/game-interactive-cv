@@ -1,0 +1,103 @@
+/* Contenedor principal del chat */
+.chat-container {
+    background-color: white;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-heavy);
+    width: 90%;
+    max-width: 500px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: dialogAppear 0.3s ease-out;
+}
+
+/* Header del chat */
+.chat-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 20px;
+    border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Área de mensajes */
+.chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 300px;
+    min-height: 200px;
+    background-color: #f8f9fa;
+}
+
+.message {
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: var(--border-radius-medium);
+    max-width: 85%;
+}
+
+.bot-message {
+    background-color: #e3f2fd;
+    border-left: 4px solid var(--primary-color);
+    margin-right: auto;
+}
+
+.user-message {
+    background-color: #e8f5e8;
+    border-left: 4px solid var(--success-color);
+    margin-left: auto;
+}
+
+.message-sender {
+    font-weight: bold;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.message-text {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+/* Input del chat */
+.chat-input-container {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    background-color: white;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-pill);
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.chat-input:focus {
+    border-color: var(--primary-color);
+}
+
+/* Footer del chat */
+.chat-footer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    background-color: white;
+    border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
+    text-align: center;
+}

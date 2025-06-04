@@ -1,0 +1,36 @@
+/* Sección de instrucciones */
+.instructions {
+    background-color: #e8e8e8;
+    padding: 15px;
+    border-radius: var(--border-radius-medium);
+    margin-bottom: 20px;
+    max-width: 600px;
+    box-shadow: var(--shadow-light);
+}
+
+.instructions h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.instructions p {
+    margin: 8px 0;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* Estilos para las teclas */
+.key-hint {
+    display: inline-block;
+    background-color: #ddd;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-small);
+    margin: 0 3px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid #bbb;
+    box-shadow: 0 2px 0 #bbb;
+    color: #333;
+}

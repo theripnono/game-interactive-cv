@@ -1,0 +1,40 @@
+/* Responsive design */
+@media (max-width: 900px) {
+    canvas {
+        width: 90vw;
+        height: auto;
+    }
+    
+    .instructions {
+        max-width: 90vw;
+        padding: 12px;
+    }
+    
+    body {
+        padding: 15px;
+    }
+    
+    .chat-container {
+        width: 95%;
+        max-height: 80vh;
+    }
+    
+    .chat-messages {
+        max-height: 250px;
+        min-height: 150px;
+    }
+    
+    .chat-input-container {
+        padding: 12px 15px;
+    }
+    
+    .chat-input {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    
+    .send-btn {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
