@@ -13,20 +13,21 @@ const redCircle = {
     speed: 5
 };
 
-// Propiedades del círculo azul (movimiento aleatorio)
+// Propiedades del círculo azul (movimiento por intervalos)
 const blueCircle = {
     x: Math.random() * (canvas.width - 50) + 25, // Posición inicial aleatoria
     y: Math.random() * (canvas.height - 50) + 25,
     radius: 20,
     color: '#0066ff',
     strokeColor: '#0044cc',
-    speed: 2,
-    direction: {
-        x: (Math.random() - 0.5) * 2, // Dirección aleatoria entre -1 y 1
-        y: (Math.random() - 0.5) * 2
-    },
-    changeDirectionTimer: 0,
-    changeDirectionInterval: Math.random() * 120 + 60 // Cambiar dirección cada 1-3 segundos aprox
+    targetX: 0,
+    targetY: 0,
+    isMoving: false,
+    speed: 5, // Velocidad alta para movimientos largos
+    waitTimer: 0,
+    waitInterval: 300, // 5 segundos a 60 FPS (5 * 60 = 300 frames)
+    minDistance: 150, // Distancia mínima para los saltos
+    maxDistance: 300  // Distancia máxima para los saltos
 };
 
 // Objeto para rastrear las teclas presionadas
@@ -102,33 +103,78 @@ function updateRedCirclePosition() {
 }
 
 /**
- * Actualiza la posición del círculo azul con movimiento aleatorio
+ * Genera una nueva posición objetivo aleatoria para el círculo azul
+ * que esté a una distancia considerable de la posición actual
+ */
+function generateNewTarget() {
+    let newX, newY, distance;
+    let attempts = 0;
+    const maxAttempts = 50;
+    
+    do {
+        // Generar posición aleatoria dentro del canvas
+        newX = Math.random() * (canvas.width - blueCircle.radius * 2) + blueCircle.radius;
+        newY = Math.random() * (canvas.height - blueCircle.radius * 2) + blueCircle.radius;
+        
+        // Calcular distancia desde la posición actual
+        const dx = newX - blueCircle.x;
+        const dy = newY - blueCircle.y;
+        distance = Math.sqrt(dx * dx + dy * dy);
+        
+        attempts++;
+    } while (distance < blueCircle.minDistance && attempts < maxAttempts);
+    
+    // Si no encontramos una posición suficientemente lejana, forzar una
+    if (distance < blueCircle.minDistance) {
+        const angle = Math.random() * 2 * Math.PI;
+        const targetDistance = blueCircle.minDistance + Math.random() * (blueCircle.maxDistance - blueCircle.minDistance);
+        
+        newX = blueCircle.x + Math.cos(angle) * targetDistance;
+        newY = blueCircle.y + Math.sin(angle) * targetDistance;
+        
+        // Asegurar que esté dentro del canvas
+        newX = Math.max(blueCircle.radius, Math.min(canvas.width - blueCircle.radius, newX));
+        newY = Math.max(blueCircle.radius, Math.min(canvas.height - blueCircle.radius, newY));
+    }
+    
+    blueCircle.targetX = newX;
+    blueCircle.targetY = newY;
+}
+
+/**
+ * Actualiza la posición del círculo azul con movimiento por intervalos
  */
 function updateBlueCirclePosition() {
-    // Incrementar el temporizador
-    blueCircle.changeDirectionTimer++;
-    
-    // Cambiar dirección aleatoriamente en intervalos
-    if (blueCircle.changeDirectionTimer >= blueCircle.changeDirectionInterval) {
-        blueCircle.direction.x = (Math.random() - 0.5) * 2;
-        blueCircle.direction.y = (Math.random() - 0.5) * 2;
-        blueCircle.changeDirectionTimer = 0;
-        blueCircle.changeDirectionInterval = Math.random() * 120 + 60; // Nuevo intervalo aleatorio
-    }
-    
-    // Mover el círculo azul
-    blueCircle.x += blueCircle.direction.x * blueCircle.speed;
-    blueCircle.y += blueCircle.direction.y * blueCircle.speed;
-    
-    // Rebotar en los bordes del canvas
-    if (blueCircle.x - blueCircle.radius <= 0 || blueCircle.x + blueCircle.radius >= canvas.width) {
-        blueCircle.direction.x *= -1; // Invertir dirección horizontal
-        blueCircle.x = Math.max(blueCircle.radius, Math.min(canvas.width - blueCircle.radius, blueCircle.x));
-    }
-    
-    if (blueCircle.y - blueCircle.radius <= 0 || blueCircle.y + blueCircle.radius >= canvas.height) {
-        blueCircle.direction.y *= -1; // Invertir dirección vertical
-        blueCircle.y = Math.max(blueCircle.radius, Math.min(canvas.height - blueCircle.radius, blueCircle.y));
+    if (!blueCircle.isMoving) {
+        // Círculo está esperando - incrementar temporizador
+        blueCircle.waitTimer++;
+        
+        if (blueCircle.waitTimer >= blueCircle.waitInterval) {
+            // Han pasado 5 segundos, iniciar movimiento
+            generateNewTarget();
+            blueCircle.isMoving = true;
+            blueCircle.waitTimer = 0;
+        }
+    } else {
+        // Círculo está en movimiento hacia el objetivo
+        const dx = blueCircle.targetX - blueCircle.x;
+        const dy = blueCircle.targetY - blueCircle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance > blueCircle.speed) {
+            // Continuar movimiento hacia el objetivo
+            const moveX = (dx / distance) * blueCircle.speed;
+            const moveY = (dy / distance) * blueCircle.speed;
+            
+            blueCircle.x += moveX;
+            blueCircle.y += moveY;
+        } else {
+            // Llegó al objetivo, parar y empezar a esperar
+            blueCircle.x = blueCircle.targetX;
+            blueCircle.y = blueCircle.targetY;
+            blueCircle.isMoving = false;
+            blueCircle.waitTimer = 0;
+        }
     }
 }
 
@@ -156,10 +202,16 @@ function applyBoundaryConstraints(circle) {
 }
 
 /**
- * Actualiza el texto que muestra la posición actual del círculo rojo
+ * Actualiza el texto que muestra la posición y estado de los círculos
  */
 function updatePositionDisplay() {
-    positionDisplay.textContent = `Red Circle - X: ${Math.round(redCircle.x)}, Y: ${Math.round(redCircle.y)}`;
+    const timeRemaining = Math.ceil((blueCircle.waitInterval - blueCircle.waitTimer) / 60);
+    const blueStatus = blueCircle.isMoving ? "Moving" : `Waiting (${timeRemaining}s)`;
+    
+    positionDisplay.innerHTML = `
+        Red Circle - X: ${Math.round(redCircle.x)}, Y: ${Math.round(redCircle.y)}<br>
+        Blue Circle - X: ${Math.round(blueCircle.x)}, Y: ${Math.round(blueCircle.y)} | Status: ${blueStatus}
+    `;
 }
 
 /**
@@ -211,9 +263,12 @@ function detectCollision(circle1, circle2) {
  */
 function handleCollisions() {
     if (detectCollision(redCircle, blueCircle)) {
-        // Cambiar la dirección del círculo azul aleatoriamente cuando colisiona
-        blueCircle.direction.x = (Math.random() - 0.5) * 2;
-        blueCircle.direction.y = (Math.random() - 0.5) * 2;
+        // Si el círculo azul está parado, forzar un nuevo movimiento inmediatamente
+        if (!blueCircle.isMoving) {
+            generateNewTarget();
+            blueCircle.isMoving = true;
+            blueCircle.waitTimer = 0;
+        }
         
         // Separar los círculos para evitar que se queden pegados
         const dx = redCircle.x - blueCircle.x;
