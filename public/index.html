@@ -3,46 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movable Red Circle</title>
+    <title>🌽 Dvdrg Farm 🌽</title>
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div class="instructions">
-        <h3>Controls:</h3>
-        <p>Move the red circle using:</p>
-        <p>
-            <span class="key-hint">W</span> <span class="key-hint">A</span> <span class="key-hint">S</span> <span class="key-hint">D</span> keys or 
-            <span class="key-hint">↑</span> <span class="key-hint">←</span> <span class="key-hint">↓</span> <span class="key-hint">→</span> arrow keys
-        </p>
-        <p>When near the blue circle, press <span class="key-hint">SPACE</span> to interact</p>
-        <p>Close dialog with <span class="key-hint">ESC</span> or click "Cerrar"</p>
+    <!-- Initial Instructions Modal -->
+    <div id="instructionsModal" class="instructions-modal">
+        <div class="instructions-content">
+            <h2>Dvdrg Farm 🧑🌾</h2>
+            <h3>Controls:</h3>
+            <p>Move the red circle using:</p>
+            <p>
+                <span class="key-hint">W</span> <span class="key-hint">A</span> <span class="key-hint">S</span> <span class="key-hint">D</span> keys or arrow keys 
+                <span class="key-hint">↑</span> <span class="key-hint">←</span> <span class="key-hint">↓</span> <span class="key-hint">→</span>
+            </p>
+            <p>When near the blue circle, press <span class="key-hint">SPACE</span> to interact</p>
+            <p>Close dialogs with <span class="key-hint">ESC</span> or by clicking "Close"</p>
+            
+            <button id="startGameBtn" class="start-game-btn">Start Game!</button>
+        </div>
     </div>
 
-    <!-- Indicador de interacción -->
+    <!-- Help button (top-right corner) -->
+    <button id="helpBtn" class="help-btn hidden">?</button>
+
+    <!-- Interaction hint -->
     <div id="interactionHint" class="interaction-hint hidden">Press SPACE to interact</div>
 
-    <!-- Chat de interacción -->
+    <!-- Interaction chat -->
     <div id="dialogBox" class="dialog-box hidden">
         <div class="chat-container">
             <div class="chat-header">
-                <h3>Chat con el Círculo Azul</h3>
+                <h3>Chat with Blue Circle</h3>
                 <button id="closeChatBtn" class="close-btn">&times;</button>
             </div>
             
             <div id="chatMessages" class="chat-messages">
                 <div class="message bot-message">
-                    <span class="message-sender">Círculo Azul:</span>
-                    <span class="message-text">¡Hola! ¿En qué puedo ayudarte?</span>
+                    <span class="message-sender">Blue Circle:</span>
+                    <span class="message-text">Hello! How can I help you?</span>
                 </div>
             </div>
             
             <div class="chat-input-container">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Escribe tu mensaje..." maxlength="200">
-                <button id="sendMessage" class="send-btn">Enviar</button>
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type your message..." maxlength="200">
+                <button id="sendMessage" class="send-btn">Send</button>
             </div>
             
             <div class="chat-footer">
-                <button id="closeChat" class="dialog-button close-chat-btn">Cerrar Chat</button>
+                <button id="closeChat" class="dialog-button close-chat-btn">Close Chat</button>
             </div>
         </div>
     </div>

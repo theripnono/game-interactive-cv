@@ -20,8 +20,8 @@ const chatHistory = new Map();
  */
 function initializeChatHistory() {
     // Inicializar historial vacío para cada NPC conocido
-    chatHistory.set('Círculo Azul', []);
-    chatHistory.set('Círculo Verde', []);
+    chatHistory.set('Blue NPC', []);
+    chatHistory.set('Green NPC', []);
 }
 
 /**
@@ -78,7 +78,7 @@ function restoreChatHistory(npcName) {
  */
 function openChat() {
     if (!gameState.activeNPC) {
-        console.warn('No hay NPC activo para abrir chat');
+        console.warn('No NPC active to open chat');
         return;
     }
     
@@ -104,7 +104,7 @@ function openChat() {
 function updateChatHeader() {
     const chatHeader = document.querySelector('#dialogBox h3');
     if (chatHeader && gameState.activeNPC) {
-        chatHeader.textContent = `Conversando con ${gameState.activeNPC.name}`;
+        chatHeader.textContent = `Chatting with ${gameState.activeNPC.name}`;
         chatHeader.style.color = gameState.activeNPC.chatColor;
     }
 }

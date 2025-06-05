@@ -314,15 +314,15 @@ class NPCCircle {
 // Configuraciones de personalidad con identificadores únicos
 const BLUE_PERSONALITY = {
     id: "blue_circle",
-    name: "Círculo Azul",
-    chatColor: "#0066ff",
+    name: "Blue NPC",
+    chatColor: "#fffff",
     personality: "sabio y tranquilo, le gusta la filosofía y hablar de temas profundos. Es el más viejo del canvas y siempre da consejos reflexivos. Se mueve con propósito y contemplación dentro de su área designada."
 };
 
 const GREEN_PERSONALITY = {
     id: "green_circle",
-    name: "Círculo Verde",
-    chatColor: "#00cc44", 
+    name: "Green NPC",
+    chatColor: "#fffff",
     personality: "energético y aventurero, siempre está emocionado y habla de deportes, viajes y nuevas experiencias. Le encanta explorar su área asignada del canvas y moverse dinámicamente."
 };
 
