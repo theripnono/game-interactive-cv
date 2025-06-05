@@ -43,6 +43,21 @@ function detectProximity(circle1, circle2, threshold = PHYSICS_CONFIG.proximityT
 }
 
 /**
+ * Calcula la distancia exacta entre dos círculos
+ * @param {Object} circle1 - Primer círculo
+ * @param {Object} circle2 - Segundo círculo
+ * @returns {number} - Distancia entre los bordes de los círculos
+ */
+function calculateDistance(circle1, circle2) {
+    const dx = circle1.x - circle2.x;
+    const dy = circle1.y - circle2.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const minDistance = circle1.radius + circle2.radius;
+    
+    return distance - minDistance;
+}
+
+/**
  * Detecta colisión entre dos círculos
  * @param {Object} circle1 - Primer círculo
  * @param {Object} circle2 - Segundo círculo
@@ -56,40 +71,75 @@ function detectCollision(circle1, circle2) {
 }
 
 /**
- * Maneja la colisión entre círculos
+ * Encuentra el NPC más cercano al círculo rojo que esté en proximidad
+ * @returns {Object|null} - El NPC más cercano o null si ninguno está cerca
  */
-function handleCollisions() {
-    if (detectCollision(redCircle, blueCircle)) {
-        // Solo afecta al círculo rojo
-        const dx = redCircle.x - blueCircle.x;
-        const dy = redCircle.y - blueCircle.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance > 0) {
-            const overlap = (redCircle.radius + blueCircle.radius) - distance;
-            const separationX = (dx / distance) * overlap;
-            const separationY = (dy / distance) * overlap;
-            
-            // Solo mover el círculo rojo
-            redCircle.x += separationX;
-            redCircle.y += separationY;
-            
-            applyBoundaryConstraints(redCircle);
+function findClosestNPCInProximity() {
+    let closestNPC = null;
+    let closestDistance = Infinity;
+    
+    npcCircles.forEach(npc => {
+        if (detectProximity(redCircle, npc)) {
+            const distance = calculateDistance(redCircle, npc);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestNPC = npc;
+            }
         }
+    });
+    
+    return closestNPC;
+}
+
+/**
+ * Resuelve la colisión entre el círculo rojo y un círculo NPC
+ * @param {Object} npcCircle - El círculo NPC que colisiona
+ */
+function resolveCollisionWithRed(npcCircle) {
+    const dx = redCircle.x - npcCircle.x;
+    const dy = redCircle.y - npcCircle.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > 0) {
+        const overlap = (redCircle.radius + npcCircle.radius) - distance;
+        const separationX = (dx / distance) * overlap;
+        const separationY = (dy / distance) * overlap;
+        
+        // Solo mover el círculo rojo
+        redCircle.x += separationX;
+        redCircle.y += separationY;
+        
+        applyBoundaryConstraints(redCircle);
     }
 }
 
 /**
- * Actualiza el estado de interacción entre círculos
+ * Maneja todas las colisiones del juego
+ */
+function handleCollisions() {
+    // Verificar colisiones entre el círculo rojo y cada círculo NPC
+    npcCircles.forEach(npcCircle => {
+        if (detectCollision(redCircle, npcCircle)) {
+            resolveCollisionWithRed(npcCircle);
+        }
+    });
+}
+
+/**
+ * Actualiza el estado de interacción con prioridad por proximidad
  */
 function updateInteractionState() {
-    const proximity = detectProximity(redCircle, blueCircle);
+    // Encontrar el NPC más cercano en proximidad
+    const closestNPC = findClosestNPCInProximity();
     
-    if (proximity && !gameState.dialogOpen) {
+    if (closestNPC && !gameState.dialogOpen) {
         setCanInteract(true);
+        setActiveNPC(closestNPC);
         showInteractionHint();
-    } else if (!proximity) {
+    } else if (!closestNPC) {
         setCanInteract(false);
+        setActiveNPC(null);
         hideInteractionHint();
     }
+    // Si hay diálogo abierto, mantener el estado actual
 }
