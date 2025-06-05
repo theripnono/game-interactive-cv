@@ -15,13 +15,21 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { message } = req.body;
+        const { message, npcName, npcPersonality } = req.body;
 
         // Validar que el mensaje existe
         if (!message) {
             return res.status(400).json({
                 success: false,
                 error: 'Message is required'
+            });
+        }
+
+        // Validar que la información del NPC existe
+        if (!npcName || !npcPersonality) {
+            return res.status(400).json({
+                success: false,
+                error: 'NPC information is required'
             });
         }
 
@@ -34,22 +42,30 @@ export default async function handler(req, res) {
             });
         }
 
-        console.log('Sending request to Claude API...');
+        console.log(`Sending request to Claude API for ${npcName}...`);
+
+        // Crear prompt del sistema personalizado según el NPC
+        const systemPrompt = `Eres ${npcName} en un videojuego 2D. Tu personalidad es: ${npcPersonality}
+
+Instrucciones importantes:
+- Respondes en español, máximo 2-3 líneas
+- Mantén tu personalidad única y consistente
+- Haz referencias ocasionales a rodar, girar, y tu vida en el canvas
+- Sé auténtico a tu personalidad: ${npcPersonality}
+- Usa emojis ocasionalmente que representen tu color (🔵 para azul, 🟢 para verde)`;
 
         const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'x-api-key': process.env.ANTHROPIC_API_KEY,
-                'anthropic-version': '2023-06-01'  // Versión actualizada
+                'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-3-5-haiku-20241022',  // Modelo actualizado
-                max_tokens: 1000,  // Límite más generoso
-                temperature: 0.7,
-                system: `Eres un círculo azul amigable y juguetón en un videojuego 2D. 
-                Respondes en español, máximo 2-3 líneas, con personalidad divertida.
-                Haces referencias a rodar, girar, y tu vida en el canvas.`,
+                model: 'claude-3-5-haiku-20241022',
+                max_tokens: 1000,
+                temperature: 0.8, // Aumentar un poco la creatividad para personalidades más distintas
+                system: systemPrompt,
                 messages: [{
                     role: 'user',
                     content: message
@@ -76,7 +92,7 @@ export default async function handler(req, res) {
         }
 
         const data = await response.json();
-        console.log('Claude API Response:', JSON.stringify(data, null, 2));
+        console.log(`Claude API Response for ${npcName}:`, JSON.stringify(data, null, 2));
 
         // Verificar estructura de respuesta
         if (data.content && Array.isArray(data.content) && data.content[0] && data.content[0].text) {
@@ -93,9 +109,19 @@ export default async function handler(req, res) {
         console.error('Claude API error:', error.message);
         console.error('Error stack:', error.stack);
 
+        // Mensaje de error personalizado según el NPC si está disponible
+        let errorMessage = '¡Ay! Mi cerebro circular se trabó un momento. ¿Podrías repetir eso?';
+        const { npcName } = req.body;
+        
+        if (npcName === 'Círculo Azul') {
+            errorMessage += ' 🔵';
+        } else if (npcName === 'Círculo Verde') {
+            errorMessage += ' 🟢';
+        }
+
         res.status(500).json({
             success: false,
-            message: '¡Ay! Mi cerebro circular se trabó un momento. ¿Podrías repetir eso? 🔵',
+            message: errorMessage,
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }

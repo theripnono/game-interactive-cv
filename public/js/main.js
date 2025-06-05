@@ -8,7 +8,7 @@
  */
 function updateGame() {
     updateRedCirclePosition();
-    updateBlueCirclePosition();
+    updateNPCCirclesPosition(); // Actualiza todos los círculos NPC de una vez
     updateInteractionState();
     handleCollisions();
 }

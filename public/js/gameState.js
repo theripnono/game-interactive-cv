@@ -7,7 +7,8 @@
 const gameState = {
     isPaused: false,
     canInteract: false,
-    dialogOpen: false
+    dialogOpen: false,
+    activeNPC: null // Referencia al NPC con el que se está interactuando
 };
 
 // Objeto para rastrear las teclas presionadas
@@ -46,10 +47,23 @@ function setCanInteract(canInteract) {
 }
 
 /**
+ * Establece el NPC activo para la interacción
+ * @param {Object|null} npc - El NPC activo o null si no hay ninguno
+ */
+function setActiveNPC(npc) {
+    gameState.activeNPC = npc;
+}
+
+/**
  * Establece el estado del diálogo
  * @param {boolean} isOpen - Si el diálogo está abierto o no
  */
 function setDialogState(isOpen) {
     gameState.dialogOpen = isOpen;
     gameState.isPaused = isOpen;
+    
+    // Limpiar el NPC activo cuando se cierra el diálogo
+    if (!isOpen) {
+        gameState.activeNPC = null;
+    }
 }

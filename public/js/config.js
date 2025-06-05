@@ -28,6 +28,17 @@ const BLUE_CIRCLE_CONFIG = {
     maxDistance: 300
 };
 
+// Configuración del círculo verde (NPC)
+const GREEN_CIRCLE_CONFIG = {
+    radius: 18,
+    color: '#00cc44',
+    strokeColor: '#009933',
+    speed: 6,
+    waitInterval: 240, // 4 segundos a 60 FPS
+    minDistance: 120,
+    maxDistance: 250
+};
+
 // Configuración de física
 const PHYSICS_CONFIG = {
     proximityThreshold: 1 // píxeles de separación para interacción

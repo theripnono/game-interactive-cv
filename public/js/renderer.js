@@ -28,35 +28,49 @@ function drawCircle(circle) {
     ctx.strokeStyle = circle.strokeColor;
     ctx.lineWidth = 2;
     ctx.stroke();
+    
+    // Si es el NPC activo, añadir un indicador visual
+    if (gameState.activeNPC === circle) {
+        ctx.beginPath();
+        ctx.arc(circle.x, circle.y, circle.radius + 5, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#ffff00'; // Borde amarillo para el NPC activo
+        ctx.lineWidth = 3;
+        ctx.setLineDash([5, 5]); // Línea discontinua
+        ctx.stroke();
+        ctx.setLineDash([]); // Restablecer línea continua
+    }
 }
 
 /**
  * Dibuja todos los círculos en el canvas
  */
 function drawAllCircles() {
+    // Dibujar círculo rojo (jugador)
     drawCircle(redCircle);
-    drawCircle(blueCircle);
+    
+    // Dibujar todos los círculos NPC
+    npcCircles.forEach(circle => drawCircle(circle));
 }
 
 /**
  * Actualiza el texto que muestra la posición y estado de los círculos
  */
 function updatePositionDisplay() {
-    const timeRemaining = Math.ceil((blueCircle.waitInterval - blueCircle.waitTimer) / 60);
-    let blueStatus;
+    let interactionStatus = "";
     
-    if (gameState.isPaused) {
-        blueStatus = "Paused (Dialog open)";
-    } else {
-        blueStatus = blueCircle.isMoving ? "Moving" : `Waiting (${timeRemaining}s)`;
+    if (gameState.canInteract && gameState.activeNPC) {
+        interactionStatus = ` | Can interact with ${gameState.activeNPC.name}!`;
     }
     
-    const interactionStatus = gameState.canInteract ? " | Can interact!" : "";
+    let displayText = `Red Circle - X: ${Math.round(redCircle.x)}, Y: ${Math.round(redCircle.y)}<br>`;
     
-    positionDisplay.innerHTML = `
-        Red Circle - X: ${Math.round(redCircle.x)}, Y: ${Math.round(redCircle.y)}<br>
-        Blue Circle - X: ${Math.round(blueCircle.x)}, Y: ${Math.round(blueCircle.y)} | Status: ${blueStatus}${interactionStatus}
-    `;
+    // Añadir información de cada círculo NPC
+    displayText += `Blue Circle - X: ${Math.round(blueCircle.x)}, Y: ${Math.round(blueCircle.y)} | Status: ${blueCircle.getStatusText()}<br>`;
+    displayText += `Green Circle - X: ${Math.round(greenCircle.x)}, Y: ${Math.round(greenCircle.y)} | Status: ${greenCircle.getStatusText()}`;
+    
+    displayText += interactionStatus;
+    
+    positionDisplay.innerHTML = displayText;
 }
 
 /**
