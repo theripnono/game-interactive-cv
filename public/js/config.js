@@ -6,7 +6,16 @@
 // Configuración del canvas
 const CANVAS_CONFIG = {
     width: 800,
-    height: 600
+    height: 800
+};
+
+// Configuración del fondo
+const BACKGROUND_CONFIG = {
+    imagePath: 'assets/farm_background.png',
+    fallbackColor: '#4a5d23', // Verde campo
+    patternColor: '#3a4d13',  // Verde más oscuro para el patrón
+    patternSize: 40,          // Tamaño de los cuadros del patrón
+    scaleMode: 'cover'        // 'cover', 'contain', 'stretch'
 };
 
 // Configuración del círculo rojo (jugador)
@@ -48,4 +57,14 @@ const PHYSICS_CONFIG = {
 const CHAT_CONFIG = {
     maxMessageLength: 200,
     botResponseDelay: 500 // milisegundos
+};
+
+// Configuración de renderizado
+const RENDER_CONFIG = {
+    pixelArt: true,           // Activar renderizado pixelado
+    shadowBlur: 6,            // Desenfoque de sombras
+    shadowOffset: 3,          // Offset de sombras
+    shadowAlpha: 0.4,         // Transparencia de sombras
+    interactionGlowSize: 8,   // Tamaño del brillo de interacción
+    pulseSpeed: 0.01          // Velocidad del efecto de pulso
 };
