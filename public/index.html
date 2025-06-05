@@ -10,17 +10,27 @@
     <!-- Initial Instructions Modal -->
     <div id="instructionsModal" class="instructions-modal">
         <div class="instructions-content">
-            <h2>Dvdrg Farm 🧑🌾</h2>
+            <h2> Dvdrg Farm 🧑🏼‍🌾🌾</h2>
+            <div class="game-description">
+                <p><strong>Welcome to an AI-powered farm experience!</strong></p>
+                <p>This is a prompt engineering adventure where intelligent AI acts as different farm animals. Chat with each character to discover their unique personalities, learn about their daily lives on the farm, and explore their individual stories and perspectives.</p>
+            </div>
+            
             <h3>Controls:</h3>
             <p>Move the red circle using:</p>
             <p>
                 <span class="key-hint">W</span> <span class="key-hint">A</span> <span class="key-hint">S</span> <span class="key-hint">D</span> keys or arrow keys 
                 <span class="key-hint">↑</span> <span class="key-hint">←</span> <span class="key-hint">↓</span> <span class="key-hint">→</span>
             </p>
-            <p>When near the blue circle, press <span class="key-hint">SPACE</span> to interact</p>
+            <p>When near any farm animal, press <span class="key-hint">SPACE</span> to start a conversation</p>
             <p>Close dialogs with <span class="key-hint">ESC</span> or by clicking "Close"</p>
             
-            <button id="startGameBtn" class="start-game-btn">Start Game!</button>
+            <div class="farm-info">
+                <p><em>🐄 Each animal has its own personality, memories, and stories to share!</em></p>
+                <p><em>🌾 Ask them about farm life, their daily routines, or anything that comes to mind!</em></p>
+            </div>
+            
+            <button id="startGameBtn" class="start-game-btn">Enter the Farm!</button>
         </div>
     </div>
 
@@ -28,25 +38,25 @@
     <button id="helpBtn" class="help-btn hidden">?</button>
 
     <!-- Interaction hint -->
-    <div id="interactionHint" class="interaction-hint hidden">Press SPACE to interact</div>
+    <div id="interactionHint" class="interaction-hint hidden">Press SPACE to chat with the animal</div>
 
     <!-- Interaction chat -->
     <div id="dialogBox" class="dialog-box hidden">
         <div class="chat-container">
             <div class="chat-header">
-                <h3>Chat with Blue Circle</h3>
+                <h3>Chatting with Farm Animal</h3>
                 <button id="closeChatBtn" class="close-btn">&times;</button>
             </div>
             
             <div id="chatMessages" class="chat-messages">
                 <div class="message bot-message">
-                    <span class="message-sender">Blue Circle:</span>
-                    <span class="message-text">Hello! How can I help you?</span>
+                    <span class="message-sender">Farm Animal:</span>
+                    <span class="message-text">Hello there! Welcome to our farm! What would you like to know about life here?</span>
                 </div>
             </div>
             
             <div class="chat-input-container">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Type your message..." maxlength="200">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Ask about their life on the farm..." maxlength="200">
                 <button id="sendMessage" class="send-btn">Send</button>
             </div>
             

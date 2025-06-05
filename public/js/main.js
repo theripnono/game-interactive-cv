@@ -28,9 +28,6 @@ function startGame() {
     // Mostrar botón de ayuda
     helpBtn.classList.remove('hidden');
     
-    // Mostrar notificación de inicio
-    // showPixelNotification('Game Started!');
-    
     // Reanudar el juego si estaba pausado
     resumeGame();
     
@@ -59,39 +56,6 @@ function closeInstructions() {
     }
 }
 
-/**
- * Función para mostrar notificación pixelada
- */
-// function showPixelNotification(message) {
-//     const notification = document.createElement('div');
-//     notification.className = 'pixel-notification';
-//     notification.textContent = message;
-//     notification.style.cssText = `
-//         position: fixed;
-//         top: 50%;
-//         left: 50%;
-//         transform: translate(-50%, -50%);
-//         background-color: var(--bg-secondary);
-//         color: var(--text-primary);
-//         padding: 16px;
-//         border: 4px solid var(--border-dark);
-//         box-shadow: var(--shadow-pixel);
-//         font-family: 'Courier New', monospace;
-//         font-size: 16px;
-//         font-weight: bold;
-//         text-transform: uppercase;
-//         z-index: 1001;
-//         animation: pixelNotificationShow 0.3s steps(3, end);
-//     `;
-    
-//     document.body.appendChild(notification);
-    
-//     setTimeout(() => {
-//         if (notification.parentNode) {
-//             notification.remove();
-//         }
-//     }, 2000);
-// }
 
 /**
  * Manejo de eventos adicionales para el modal

@@ -20,19 +20,23 @@
 }
 
 .instructions-modal.hidden {
-    display: none;
+    display: none !important;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .instructions-content {
     background-color: var(--bg-secondary);
     padding: 24px;
     border-radius: var(--border-radius-medium);
-    max-width: 600px;
+    max-width: 650px;
     width: 90%;
     border: 4px solid var(--border-dark);
     box-shadow: var(--shadow-pixel);
     position: relative;
     animation: instructionsSlide 0.4s steps(6, end);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 /* Patrón de píxeles de fondo */
@@ -128,6 +132,49 @@
     border-color: var(--secondary-dark);
 }
 
+/* Game description section */
+.game-description {
+    background-color: rgba(74, 144, 226, 0.15);
+    border: 2px solid var(--primary-color);
+    padding: 12px;
+    margin: 12px 0 20px 0;
+    border-radius: var(--border-radius-small);
+    position: relative;
+    z-index: 1;
+}
+
+.game-description p {
+    margin: 6px 0;
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.game-description p:first-child {
+    color: var(--primary-color);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+/* Farm info section */
+.farm-info {
+    background-color: rgba(126, 211, 33, 0.15);
+    border: 2px solid var(--success-color);
+    padding: 10px;
+    margin: 16px 0 20px 0;
+    border-radius: var(--border-radius-small);
+    position: relative;
+    z-index: 1;
+}
+
+.farm-info p {
+    margin: 4px 0;
+    color: var(--success-color);
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: bold;
+}
 /* Botón para comenzar el juego */
 .start-game-btn {
     background-color: var(--primary-color);
@@ -144,7 +191,7 @@
     text-transform: uppercase;
     display: block;
     margin: 20px auto 0;
-    min-width: 150px;
+    min-width: 180px;
 }
 
 .start-game-btn:hover {
