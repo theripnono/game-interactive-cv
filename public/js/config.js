@@ -18,34 +18,52 @@ const BACKGROUND_CONFIG = {
     scaleMode: 'cover'        // 'cover', 'contain', 'stretch'
 };
 
+// NUEVA: Configuración del área de movimiento restringida
+const MOVEMENT_AREA = {
+    xMin: 170,
+    xMax: 640,
+    yMin: 265,    // Nota: yMin es el valor más pequeño (parte superior)
+    yMax: 510,    // yMax es el valor más grande (parte inferior)
+    // Propiedades calculadas automáticamente
+    get width() { return this.xMax - this.xMin; },
+    get height() { return this.yMax - this.yMin; },
+    get centerX() { return this.xMin + this.width / 2; },
+    get centerY() { return this.yMin + this.height / 2; }
+};
+
 // Configuración del círculo rojo (jugador)
 const RED_CIRCLE_CONFIG = {
     radius: 25,
     color: '#ff0000',
     strokeColor: '#cc0000',
-    speed: 5
+    speed: 5,
+    restrictToArea: true  // NUEVA: Si el jugador también debe respetar el área
 };
 
-// Configuración del círculo azul (NPC)
+// Configuración del círculo azul (NPC) - Movimiento más contemplativo y amplio
 const BLUE_CIRCLE_CONFIG = {
     radius: 20,
     color: '#0066ff',
     strokeColor: '#0044cc',
-    speed: 8,
-    waitInterval: 300, // 5 segundos a 60 FPS
-    minDistance: 150,
-    maxDistance: 300
+    speed: 6,                 
+    waitInterval: 420,        // 7 segundos - más tiempo de reflexión
+    minDistance: 80,          // Ajustado para el área más pequeña
+    maxDistance: 200,         // Ajustado para el área restringida
+    movementVariability: 0.8,
+    restrictToArea: true      // NUEVA: Restringir a área específica
 };
 
-// Configuración del círculo verde (NPC)
+// Configuración del círculo verde (NPC) - Movimiento más enérgico y exploratorio
 const GREEN_CIRCLE_CONFIG = {
     radius: 18,
     color: '#00cc44',
     strokeColor: '#009933',
-    speed: 6,
-    waitInterval: 240, // 4 segundos a 60 FPS
-    minDistance: 120,
-    maxDistance: 250
+    speed: 9,                 
+    waitInterval: 180,        // 3 segundos - menos tiempo de espera
+    minDistance: 60,          // Ajustado para el área más pequeña
+    maxDistance: 180,         // Ajustado para el área restringida
+    movementVariability: 1.2,
+    restrictToArea: true      // NUEVA: Restringir a área específica
 };
 
 // Configuración de física
@@ -66,5 +84,14 @@ const RENDER_CONFIG = {
     shadowOffset: 3,          // Offset de sombras
     shadowAlpha: 0.4,         // Transparencia de sombras
     interactionGlowSize: 8,   // Tamaño del brillo de interacción
-    pulseSpeed: 0.01          // Velocidad del efecto de pulso
+    pulseSpeed: 0.01,         // Velocidad del efecto de pulso
+    showMovementArea: true    // NUEVA: Mostrar el área de movimiento visualmente
+};
+
+// Configuración avanzada de movimiento (modificada para área restringida)
+const MOVEMENT_CONFIG = {
+    // Permite movimientos ocasionales más largos o más cortos
+    extremeMovementChance: 0.15, // 15% de probabilidad de movimiento extremo
+    extremeMinMultiplier: 0.5,   // Multiplicador para movimientos cortos extremos
+    extremeMaxMultiplier: 1.2    // Reducido para que no se salga del área
 };
