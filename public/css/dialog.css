@@ -1,30 +1,58 @@
-/* Estilos para el sistema de diálogos */
+/* Estilos para el sistema de diálogos - Pixel Art */
 .dialog-box {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    transition: opacity 0.3s ease;
+    transition: none;
+    /* Patrón de dithering para simular transparencia pixelada */
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(42, 42, 42, 0.5) 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(42, 42, 42, 0.5) 1px, transparent 1px);
+    background-size: 4px 4px;
+    background-position: 0 0, 2px 2px;
 }
 
 .dialog-box.hidden {
     display: none;
 }
 
-/* Animaciones para el diálogo */
+/* Animaciones para el diálogo - Estilo Pixel */
 @keyframes dialogAppear {
-    from {
-        transform: scale(0.7);
+    0% {
+        transform: scale(0.5);
         opacity: 0;
     }
-    to {
+    25% {
+        transform: scale(0.7);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(0.9);
+        opacity: 0.6;
+    }
+    75% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
         transform: scale(1);
         opacity: 1;
+    }
+}
+
+/* Efecto de parpadeo para elementos importantes */
+@keyframes pixelBlink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.5;
     }
 }

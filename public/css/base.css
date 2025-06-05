@@ -1,25 +1,65 @@
-/* Reset y estilos base */
+/* Reset y estilos base - Pixel Art 16x16 */
 body {
     margin: 0;
-    padding: 20px;
-    background-color: #f0f0f0;
-    font-family: Arial, sans-serif;
+    padding: 16px;
+    background-color: #2a2a2a;
+    /* Fuente pixelada */
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+    font-size: 16px;
+    line-height: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* Desactivar anti-aliasing para efecto pixelado */
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
 }
 
-/* Variables CSS para colores consistentes */
+/* Variables CSS para paleta de colores pixel art */
 :root {
-    --primary-color: #0066ff;
-    --success-color: #28a745;
-    --secondary-color: #6c757d;
-    --border-color: #e0e0e0;
-    --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.1);
-    --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.3);
-    --border-radius-small: 4px;
-    --border-radius-medium: 8px;
-    --border-radius-large: 12px;
-    --border-radius-pill: 25px;
+    /* Colores principales estilo 16-bit */
+    --primary-color: #4a90e2;
+    --primary-dark: #2e5aa8;
+    --success-color: #7ed321;
+    --success-dark: #5ba017;
+    --secondary-color: #9b9b9b;
+    --secondary-dark: #6d6d6d;
+    --danger-color: #d0021b;
+    --danger-dark: #9a0114;
+    
+    /* Colores de fondo */
+    --bg-primary: #2a2a2a;
+    --bg-secondary: #404040;
+    --bg-light: #5c5c5c;
+    --bg-white: #e8e8e8;
+    
+    /* Colores de texto */
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-dark: #333333;
+    
+    /* Colores de borde */
+    --border-color: #666666;
+    --border-light: #999999;
+    --border-dark: #333333;
+    
+    /* Sombras pixeladas (usando box-shadow sólidas) */
+    --shadow-pixel: 2px 2px 0px #000000;
+    --shadow-pixel-light: 1px 1px 0px #333333;
+    --shadow-pixel-inset: inset 1px 1px 0px #ffffff33;
+    
+    /* Radios de borde - todos 0 para efecto pixelado */
+    --border-radius-small: 0px;
+    --border-radius-medium: 0px;
+    --border-radius-large: 0px;
+    --border-radius-pill: 0px;
+}
+
+/* Desactivar suavizado de texto */
+* {
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: auto;
+    font-smooth: never;
 }

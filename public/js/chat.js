@@ -123,7 +123,7 @@ function closeChat() {
  */
 function showInteractionHint() {
     if (gameState.activeNPC) {
-        interactionHint.textContent = `Presiona ESPACIO para hablar con ${gameState.activeNPC.name}`;
+        interactionHint.textContent = `Press SPACE to talk to ${gameState.activeNPC.name}`;
         interactionHint.style.color = gameState.activeNPC.chatColor;
     }
     interactionHint.classList.remove('hidden');

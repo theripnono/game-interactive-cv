@@ -41,7 +41,7 @@ const GREEN_CIRCLE_CONFIG = {
 
 // Configuración de física
 const PHYSICS_CONFIG = {
-    proximityThreshold: 1 // píxeles de separación para interacción
+    proximityThreshold: 10 // píxeles de separación para interacción
 };
 
 // Configuración del chat
