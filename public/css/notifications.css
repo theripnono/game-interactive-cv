@@ -1,7 +1,7 @@
 /* Indicador de interacción - Estilo Pixel */
 .interaction-hint {
     position: absolute;
-    top: 16px;
+    top: 100px;
     left: 50%;
     transform: translateX(-50%);
     background-color: var(--success-color);

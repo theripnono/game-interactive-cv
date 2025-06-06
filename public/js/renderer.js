@@ -184,7 +184,7 @@ function updatePositionDisplay() {
 function render() {
     clearCanvas();
     drawAllCircles();
-    updatePositionDisplay();
+    // updatePositionDisplay();
 }
 
 /**
