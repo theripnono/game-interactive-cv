@@ -196,9 +196,7 @@
 }
 
 /* ===== CONTACTO SECTION ===== */
-.contact-section {
-    background-color: var(--bg-secondary);
-}
+
 
 .contact-grid {
     display: grid;
