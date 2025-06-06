@@ -11,7 +11,7 @@ const CANVAS_CONFIG = {
 
 // Configuración del fondo
 const BACKGROUND_CONFIG = {
-    imagePath: 'assets/farm_background.png',
+    imagePath: 'assets/farm/farm_background.png',
     fallbackColor: '#4a5d23', // Verde campo
     patternColor: '#3a4d13',  // Verde más oscuro para el patrón
     patternSize: 40,          // Tamaño de los cuadros del patrón
@@ -45,7 +45,7 @@ const BLUE_CIRCLE_CONFIG = {
     radius: 20,
     color: '#0066ff',
     strokeColor: '#0044cc',
-    speed: 6,                 
+    speed: 6,
     waitInterval: 420,        // 7 segundos - más tiempo de reflexión
     minDistance: 80,          // Ajustado para el área más pequeña
     maxDistance: 200,         // Ajustado para el área restringida
@@ -58,7 +58,7 @@ const GREEN_CIRCLE_CONFIG = {
     radius: 18,
     color: '#00cc44',
     strokeColor: '#009933',
-    speed: 9,                 
+    speed: 9,
     waitInterval: 180,        // 3 segundos - menos tiempo de espera
     minDistance: 60,          // Ajustado para el área más pequeña
     maxDistance: 180,         // Ajustado para el área restringida
