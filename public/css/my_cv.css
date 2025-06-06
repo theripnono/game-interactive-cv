@@ -1,0 +1,630 @@
+/* MY CV - Pixel Art CSS usando el sistema existente */
+
+/* Importar estilos base del sistema pixel art */
+@import url('./base.css');
+@import url('./buttons.css');
+@import url('./dialog.css');
+
+/* ===== ESTILOS ESPECÍFICOS PARA CV ===== */
+
+/* Header del CV con navegación */
+.pixel-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--bg-secondary);
+    border-bottom: 4px solid var(--border-dark);
+    box-shadow: var(--shadow-pixel);
+}
+
+.cv-main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Secciones del CV */
+.cv-section {
+    background-color: var(--bg-white);
+    border: 4px solid var(--border-dark);
+    box-shadow: var(--shadow-pixel);
+    padding: 24px;
+    position: relative;
+    animation: dialogAppear 0.2s steps(4, end);
+}
+
+/* Patrón de fondo pixelado para secciones */
+.cv-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.section-title {
+    color: var(--primary-color);
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0px var(--primary-dark);
+    position: relative;
+    z-index: 1;
+    border-bottom: 2px solid var(--border-dark);
+    padding-bottom: 8px;
+}
+
+/* ===== PERFIL SECTION ===== */
+.profile-header {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.pixel-avatar {
+    width: 80px;
+    height: 80px;
+    background-color: var(--secondary-color);
+    border: 4px solid var(--border-dark);
+    box-shadow: var(--shadow-pixel);
+    position: relative;
+}
+
+.avatar-face {
+    width: 64px;
+    height: 64px;
+    background-color: #ffdbac;
+    border: 2px solid var(--border-dark);
+    position: absolute;
+    top: 6px;
+    left: 6px;
+}
+
+.avatar-hair {
+    width: 48px;
+    height: 16px;
+    background-color: #8b4513;
+    border: 2px solid var(--border-dark);
+    position: absolute;
+    top: 2px;
+    left: 14px;
+}
+
+.avatar-eyes {
+    width: 32px;
+    height: 8px;
+    background-color: var(--text-dark);
+    position: absolute;
+    top: 24px;
+    left: 22px;
+}
+
+.avatar-eyes::before,
+.avatar-eyes::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background-color: var(--text-primary);
+    position: absolute;
+    top: 0;
+}
+
+.avatar-eyes::before { left: 4px; }
+.avatar-eyes::after { right: 4px; }
+
+.profile-name {
+    color: var(--text-dark);
+    font-size: 32px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    text-shadow: 2px 2px 0px var(--border-light);
+}
+
+.profile-title {
+    color: var(--primary-color);
+    font-size: 18px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-shadow: 1px 1px 0px var(--primary-dark);
+}
+
+.profile-description {
+    color: var(--text-dark);
+    font-size: 14px;
+    line-height: 1.4;
+    font-family: 'Courier New', monospace;
+}
+
+/* ===== CONTACTO SECTION ===== */
+.contact-section {
+    background-color: var(--bg-secondary);
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.contact-item {
+    background-color: var(--bg-white);
+    border: 2px solid var(--border-dark);
+    padding: 12px;
+    box-shadow: var(--shadow-pixel-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Courier New', monospace;
+}
+
+.contact-icon {
+    font-size: 16px;
+    width: 24px;
+    text-align: center;
+}
+
+.contact-label {
+    font-weight: bold;
+    color: var(--text-dark);
+    min-width: 60px;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.contact-value {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* ===== EXPERIENCIA SECTION ===== */
+.experience-item {
+    margin-bottom: 24px;
+    padding: 16px;
+    border: 2px solid var(--border-light);
+    background-color: rgba(255, 255, 255, 0.5);
+    position: relative;
+    z-index: 1;
+}
+
+.experience-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.job-title {
+    color: var(--text-dark);
+    font-size: 18px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.company-name {
+    color: var(--primary-color);
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+}
+
+.job-period {
+    color: var(--secondary-color);
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: var(--bg-light);
+    padding: 4px 8px;
+    border: 1px solid var(--border-dark);
+    font-family: 'Courier New', monospace;
+}
+
+.job-description p {
+    color: var(--text-dark);
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    font-family: 'Courier New', monospace;
+}
+
+.achievement-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.achievement-list li {
+    color: var(--text-dark);
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 4px 0;
+    padding-left: 16px;
+    position: relative;
+    font-family: 'Courier New', monospace;
+}
+
+.achievement-list li::before {
+    content: '→';
+    color: var(--success-color);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* ===== SKILLS SECTION ===== */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.skill-category {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid var(--border-dark);
+    padding: 16px;
+    box-shadow: var(--shadow-pixel-light);
+}
+
+.skill-category-title {
+    color: var(--text-dark);
+    font-size: 16px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 4px;
+}
+
+.skill-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skill-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.skill-name {
+    color: var(--text-dark);
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 80px;
+    font-family: 'Courier New', monospace;
+}
+
+.skill-level {
+    flex: 1;
+    height: 16px;
+    background-color: var(--bg-light);
+    border: 2px solid var(--border-dark);
+    position: relative;
+    max-width: 120px;
+}
+
+.skill-bar {
+    height: 12px;
+    background-color: var(--success-color);
+    border-right: 2px solid var(--success-dark);
+    transition: width 0.5s steps(10, end);
+}
+
+/* Niveles de skill por colores */
+.skill-item.expert .skill-bar {
+    background-color: var(--success-color);
+    border-right-color: var(--success-dark);
+}
+
+.skill-item.intermediate .skill-bar {
+    background-color: var(--primary-color);
+    border-right-color: var(--primary-dark);
+}
+
+.skill-item.beginner .skill-bar {
+    background-color: var(--secondary-color);
+    border-right-color: var(--secondary-dark);
+}
+
+/* ===== PROJECTS SECTION ===== */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.project-card {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 3px solid var(--border-dark);
+    padding: 16px;
+    box-shadow: var(--shadow-pixel);
+    transition: transform 0.2s steps(2, end);
+}
+
+.project-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0px var(--border-dark);
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.project-title {
+    color: var(--text-dark);
+    font-size: 16px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.project-type {
+    color: var(--primary-color);
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: var(--bg-light);
+    padding: 2px 6px;
+    border: 1px solid var(--border-dark);
+    font-family: 'Courier New', monospace;
+}
+
+.project-preview {
+    height: 100px;
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-dark);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-canvas {
+    width: 100%;
+    height: 100%;
+    background-color: var(--success-color);
+    border: none;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.project-description p {
+    color: var(--text-dark);
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    font-family: 'Courier New', monospace;
+}
+
+.project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.tech-tag {
+    background-color: var(--secondary-color);
+    color: var(--text-primary);
+    padding: 2px 6px;
+    border: 1px solid var(--border-dark);
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+}
+
+/* ===== EDUCATION SECTION ===== */
+.education-item {
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 2px solid var(--border-light);
+    background-color: rgba(126, 211, 33, 0.1);
+    position: relative;
+    z-index: 1;
+}
+
+.education-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.degree-title {
+    color: var(--text-dark);
+    font-size: 16px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.institution-name {
+    color: var(--success-color);
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+}
+
+.education-period {
+    color: var(--secondary-color);
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: var(--bg-light);
+    padding: 4px 8px;
+    border: 1px solid var(--border-dark);
+    font-family: 'Courier New', monospace;
+}
+
+.education-description p {
+    color: var(--text-dark);
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 4px 0;
+    font-family: 'Courier New', monospace;
+}
+
+/* ===== FOOTER ===== */
+.cv-footer {
+    background-color: var(--bg-secondary);
+    border-top: 4px solid var(--border-dark);
+    margin-top: 24px;
+    padding: 20px 24px;
+    position: relative;
+}
+
+.cv-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%);
+    background-size: 16px 16px;
+    background-position: 0 0, 8px 8px;
+    pointer-events: none;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.footer-text {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+}
+
+.footer-links {
+    display: flex;
+    gap: 8px;
+}
+
+.footer-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 2px solid var(--border-dark);
+    background-color: var(--primary-color);
+    box-shadow: var(--shadow-pixel-light);
+    transition: none;
+    font-family: 'Courier New', monospace;
+}
+
+.footer-link:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--border-light);
+}
+
+.footer-link:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .cv-main {
+        padding: 16px;
+        gap: 16px;
+    }
+    
+    .cv-section {
+        padding: 16px;
+        border-width: 2px;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+    
+    .profile-name {
+        font-size: 24px;
+    }
+    
+    .section-title {
+        font-size: 20px;
+    }
+    
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .experience-header,
+    .education-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+}
