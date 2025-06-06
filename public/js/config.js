@@ -31,6 +31,29 @@ const MOVEMENT_AREA = {
     get centerY() { return this.yMin + this.height / 2; }
 };
 
+const SPRITE_CONFIG = {
+    animationSpeed: 8, // Frames del juego entre cada frame de sprite
+
+    sprites: {
+        blue: { // NPC azul = vaca
+            src: 'assets/farm/sprites/BASIC_cow_walk.png',
+            frameWidth: 32,    // 128 ÷ 4 = 32 píxeles por frame
+            frameHeight: 35,   // La altura completa
+            totalFrames: 4,
+            layout: 'horizontal',
+            scale: 4         // Empezar con escala 1:1, ajustar si es necesario
+        },
+        green: { // NPC verde = oveja
+            src: 'assets/farm/sprites/BASIC_sheep_walk.png',
+            frameWidth: 32,    // Asumo las mismas dimensiones, ajustar si es diferente
+            frameHeight: 35,   // Asumo las mismas dimensiones, ajustar si es diferente
+            totalFrames: 4,    // Asumo 4 frames, ajustar si es diferente
+            layout: 'horizontal',
+            scale: 3        // Un poco más pequeña que la vaca
+        }
+    }
+};
+
 // Configuración del círculo rojo (jugador)
 const RED_CIRCLE_CONFIG = {
     radius: 25,

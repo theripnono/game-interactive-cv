@@ -14,10 +14,10 @@ const canvas = document.getElementById('gameCanvas');
  * @returns {boolean} - True si está dentro del área
  */
 function isWithinMovementArea(x, y, radius) {
-    return (x - radius >= MOVEMENT_AREA.xMin && 
-            x + radius <= MOVEMENT_AREA.xMax && 
-            y - radius >= MOVEMENT_AREA.yMin && 
-            y + radius <= MOVEMENT_AREA.yMax);
+    return (x - radius >= MOVEMENT_AREA.xMin &&
+        x + radius <= MOVEMENT_AREA.xMax &&
+        y - radius >= MOVEMENT_AREA.yMin &&
+        y + radius <= MOVEMENT_AREA.yMax);
 }
 
 /**
@@ -28,10 +28,10 @@ function isWithinMovementArea(x, y, radius) {
  * @returns {Object} - Posición ajustada {x, y}
  */
 function constrainToMovementArea(x, y, radius) {
-    const constrainedX = Math.max(MOVEMENT_AREA.xMin + radius, 
-                                 Math.min(MOVEMENT_AREA.xMax - radius, x));
-    const constrainedY = Math.max(MOVEMENT_AREA.yMin + radius, 
-                                 Math.min(MOVEMENT_AREA.yMax - radius, y));
+    const constrainedX = Math.max(MOVEMENT_AREA.xMin + radius,
+        Math.min(MOVEMENT_AREA.xMax - radius, x));
+    const constrainedY = Math.max(MOVEMENT_AREA.yMin + radius,
+        Math.min(MOVEMENT_AREA.yMax - radius, y));
     return { x: constrainedX, y: constrainedY };
 }
 
@@ -43,7 +43,7 @@ function constrainToMovementArea(x, y, radius) {
 function getRandomPositionInArea(radius) {
     const availableWidth = MOVEMENT_AREA.width - (radius * 2);
     const availableHeight = MOVEMENT_AREA.height - (radius * 2);
-    
+
     return {
         x: MOVEMENT_AREA.xMin + radius + Math.random() * availableWidth,
         y: MOVEMENT_AREA.yMin + radius + Math.random() * availableHeight
@@ -75,7 +75,7 @@ class NPCCircle {
                 this.y = Math.random() * (canvas.height - config.radius * 2) + config.radius;
             }
         }
-        
+
         this.radius = config.radius;
         this.color = config.color;
         this.strokeColor = config.strokeColor;
@@ -85,19 +85,19 @@ class NPCCircle {
         this.maxDistance = config.maxDistance;
         this.movementVariability = config.movementVariability || 1.0;
         this.restrictToArea = config.restrictToArea || false;
-        
+
         // Propiedades de personalidad
         this.name = personalityConfig.name;
         this.personality = personalityConfig.personality;
         this.chatColor = personalityConfig.chatColor;
         this.id = personalityConfig.id;
-        
+
         // Estado de movimiento
         this.targetX = 0;
         this.targetY = 0;
         this.isMoving = false;
         this.waitTimer = 0;
-        
+
         // Historial de movimientos para evitar patrones repetitivos
         this.lastTargets = [];
         this.maxHistorySize = 3;
@@ -110,21 +110,21 @@ class NPCCircle {
         let newX, newY, distance;
         let attempts = 0;
         const maxAttempts = 150; // Aumentado porque el área es más pequeña
-        
+
         // Aplicar variabilidad de movimiento según la personalidad
         let adjustedMinDistance = this.minDistance;
         let adjustedMaxDistance = this.maxDistance;
-        
+
         // Si está restringido al área, ajustar las distancias máximas según el espacio disponible
         if (this.restrictToArea) {
             const maxPossibleDistance = Math.min(
                 MOVEMENT_AREA.width,
                 MOVEMENT_AREA.height
             ) * 0.8; // 80% del área como máximo
-            
+
             adjustedMaxDistance = Math.min(adjustedMaxDistance, maxPossibleDistance);
         }
-        
+
         // Movimientos ocasionales extremos para más variedad
         if (Math.random() < MOVEMENT_CONFIG.extremeMovementChance) {
             if (Math.random() < 0.5) {
@@ -135,7 +135,7 @@ class NPCCircle {
                 // Movimiento largo extremo
                 adjustedMinDistance = adjustedMaxDistance * 0.8;
                 adjustedMaxDistance = adjustedMaxDistance * MOVEMENT_CONFIG.extremeMaxMultiplier;
-                
+
                 // Asegurar que no exceda el área
                 if (this.restrictToArea) {
                     const maxPossibleDistance = Math.min(
@@ -146,11 +146,11 @@ class NPCCircle {
                 }
             }
         }
-        
+
         // Aplicar factor de variabilidad personal del NPC
         const variabilityFactor = 0.7 + (Math.random() * 0.6 * this.movementVariability);
         adjustedMaxDistance *= variabilityFactor;
-        
+
         do {
             if (this.restrictToArea) {
                 // Generar posición dentro del área restringida
@@ -162,11 +162,11 @@ class NPCCircle {
                 newX = Math.random() * (canvas.width - this.radius * 2) + this.radius;
                 newY = Math.random() * (canvas.height - this.radius * 2) + this.radius;
             }
-            
+
             const dx = newX - this.x;
             const dy = newY - this.y;
             distance = Math.sqrt(dx * dx + dy * dy);
-            
+
             // Verificar que no sea muy similar a movimientos recientes
             const isTooSimilar = this.lastTargets.some(target => {
                 const targetDx = newX - target.x;
@@ -174,26 +174,26 @@ class NPCCircle {
                 const targetDistance = Math.sqrt(targetDx * targetDx + targetDy * targetDy);
                 return targetDistance < 50; // Distancia mínima entre objetivos
             });
-            
+
             attempts++;
-            
+
             // Verificar condiciones: distancia correcta y no muy similar a anteriores
-            if (distance >= adjustedMinDistance && 
-                distance <= adjustedMaxDistance && 
+            if (distance >= adjustedMinDistance &&
+                distance <= adjustedMaxDistance &&
                 !isTooSimilar) {
                 break;
             }
-            
+
         } while (attempts < maxAttempts);
-        
+
         // Si no encontramos una posición óptima, generar usando ángulo aleatorio
         if (attempts >= maxAttempts) {
             const angle = Math.random() * 2 * Math.PI;
             const targetDistance = adjustedMinDistance + Math.random() * (adjustedMaxDistance - adjustedMinDistance);
-            
+
             newX = this.x + Math.cos(angle) * targetDistance;
             newY = this.y + Math.sin(angle) * targetDistance;
-            
+
             // Asegurar que esté dentro de los límites apropiados
             if (this.restrictToArea) {
                 const constrained = constrainToMovementArea(newX, newY, this.radius);
@@ -204,10 +204,10 @@ class NPCCircle {
                 newY = Math.max(this.radius + 10, Math.min(canvas.height - this.radius - 10, newY));
             }
         }
-        
+
         this.targetX = newX;
         this.targetY = newY;
-        
+
         // Guardar en historial
         this.lastTargets.push({ x: newX, y: newY });
         if (this.lastTargets.length > this.maxHistorySize) {
@@ -223,14 +223,14 @@ class NPCCircle {
         if (gameState.isPaused) {
             return;
         }
-        
+
         if (!this.isMoving) {
             // Círculo está esperando
             this.waitTimer++;
-            
+
             // Añadir pequeña variabilidad al tiempo de espera
             const variableWaitTime = this.waitInterval + (Math.random() - 0.5) * 60; // ±1 segundo
-            
+
             if (this.waitTimer >= variableWaitTime) {
                 this.generateNewTarget();
                 this.isMoving = true;
@@ -241,20 +241,20 @@ class NPCCircle {
             const dx = this.targetX - this.x;
             const dy = this.targetY - this.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            
+
             // Velocidad variable basada en la distancia (más lento cerca del objetivo)
             let currentSpeed = this.speed;
             if (distance < 50) {
                 currentSpeed = this.speed * (0.3 + 0.7 * (distance / 50));
             }
-            
+
             if (distance > currentSpeed) {
                 const moveX = (dx / distance) * currentSpeed;
                 const moveY = (dy / distance) * currentSpeed;
-                
+
                 this.x += moveX;
                 this.y += moveY;
-                
+
                 // Verificar que siga dentro del área si está restringido
                 if (this.restrictToArea && !isWithinMovementArea(this.x, this.y, this.radius)) {
                     const constrained = constrainToMovementArea(this.x, this.y, this.radius);
@@ -278,9 +278,9 @@ class NPCCircle {
         if (gameState.isPaused) {
             return "Paused (Dialog open)";
         }
-        
+
         const areaStatus = this.restrictToArea ? " [Restricted]" : "";
-        
+
         if (this.isMoving) {
             const dx = this.targetX - this.x;
             const dy = this.targetY - this.y;
@@ -338,7 +338,19 @@ const redCircle = {
 
 // Crear círculos NPC con personalidades mejoradas
 const blueCircle = new NPCCircle(BLUE_CIRCLE_CONFIG, BLUE_PERSONALITY);
+
+blueCircle.currentFrame = 0;
+blueCircle.frameCounter = 0;
+blueCircle.spriteImage = null;
+blueCircle.spriteLoaded = false;
+
 const greenCircle = new NPCCircle(GREEN_CIRCLE_CONFIG, GREEN_PERSONALITY);
+
+// AGREGAR ESTAS LÍNEAS para el NPC verde (oveja):
+greenCircle.currentFrame = 0;
+greenCircle.frameCounter = 0;
+greenCircle.spriteImage = null;
+greenCircle.spriteLoaded = false;
 
 // Array de círculos NPC para facilitar operaciones en lote
 const npcCircles = [blueCircle, greenCircle];
@@ -354,7 +366,7 @@ function updateRedCirclePosition() {
     if (keys.s || keys.ArrowDown) {
         redCircle.y += redCircle.speed;
     }
-    
+
     // Movimiento horizontal
     if (keys.a || keys.ArrowLeft) {
         redCircle.x -= redCircle.speed;
