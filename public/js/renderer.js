@@ -22,8 +22,6 @@ function initializeBackground() {
 
     backgroundImage.onload = function () {
         backgroundLoaded = true;
-        console.log('Fondo cargado exitosamente');
-        console.log(`Dimensiones del fondo: ${backgroundImage.width}x${backgroundImage.height}`);
 
         // Configurar renderizado pixelado para la imagen
         ctx.imageSmoothingEnabled = false;
@@ -36,8 +34,6 @@ function initializeBackground() {
     };
 
     backgroundImage.onerror = function () {
-        console.warn('No se pudo cargar el fondo desde assets/farm/farm_background.png');
-        console.warn('Usando fondo de color sólido como respaldo');
         backgroundLoaded = false;
     };
 
@@ -53,8 +49,7 @@ function initializeSprites() {
     const farmerSprite = new Image();
 
     farmerSprite.onload = function () {
-        console.log('Sprite de granjero cargado exitosamente');
-        console.log(`Dimensiones del sprite: ${farmerSprite.width}x${farmerSprite.height}`);
+
         redCircle.spriteImage = farmerSprite;
         redCircle.spriteLoaded = true;
         spriteImages.farmer = farmerSprite;
@@ -70,8 +65,7 @@ function initializeSprites() {
     };
 
     farmerSprite.onerror = function () {
-        console.warn('No se pudo cargar el sprite de granjero desde assets/farm/sprites/farmer_walk.png');
-        console.warn('El círculo rojo se mostrará como círculo');
+
         redCircle.spriteLoaded = false;
     };
 
@@ -81,8 +75,7 @@ function initializeSprites() {
     const cowSprite = new Image();
 
     cowSprite.onload = function () {
-        console.log('Sprite de vaca cargado exitosamente');
-        console.log(`Dimensiones del sprite: ${cowSprite.width}x${cowSprite.height}`);
+
         blueCircle.spriteImage = cowSprite;
         blueCircle.spriteLoaded = true;
         spriteImages.cow = cowSprite;
@@ -98,8 +91,7 @@ function initializeSprites() {
     };
 
     cowSprite.onerror = function () {
-        console.warn('No se pudo cargar el sprite de vaca desde assets/farm/sprites/BASIC_cow_walk.png');
-        console.warn('El NPC azul se mostrará como círculo');
+
         blueCircle.spriteLoaded = false;
     };
 
@@ -109,8 +101,7 @@ function initializeSprites() {
     const sheepSprite = new Image();
 
     sheepSprite.onload = function () {
-        console.log('Sprite de oveja cargado exitosamente');
-        console.log(`Dimensiones del sprite: ${sheepSprite.width}x${sheepSprite.height}`);
+
         greenCircle.spriteImage = sheepSprite;
         greenCircle.spriteLoaded = true;
         spriteImages.sheep = sheepSprite;
@@ -120,8 +111,7 @@ function initializeSprites() {
     };
 
     sheepSprite.onerror = function () {
-        console.warn('No se pudo cargar el sprite de oveja desde assets/farm/sprites/BASIC_sheep_walk.png');
-        console.warn('El NPC verde se mostrará como círculo');
+
         greenCircle.spriteLoaded = false;
     };
 

@@ -46,7 +46,6 @@ function initializeTouchControls() {
     createTouchUI();
     addTouchEventListeners();
 
-    console.log('🎮 Controles táctiles activados');
 }
 
 /**
@@ -572,11 +571,11 @@ function initializeInputHandlers() {
 
     // Detectar y configurar controles táctiles si es necesario
     if (isMobileDevice()) {
-        console.log('📱 Dispositivo móvil detectado');
+
         addTouchControlStyles();
         initializeTouchControls();
     } else {
-        console.log('🖥️ Dispositivo de escritorio detectado');
+
     }
 }
 

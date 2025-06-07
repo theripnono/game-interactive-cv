@@ -22,12 +22,10 @@ const MUSIC_FILES = {
  */
 function startMainMusic() {
     if (backgroundMusic && !backgroundMusic.paused) {
-        console.log('🎵 Música principal ya está sonando');
         return;
     }
 
     try {
-        console.log('🎵 Iniciando música principal...');
 
         backgroundMusic = new Audio(MUSIC_FILES.main);
         backgroundMusic.loop = true; // ✅ Música principal SÍ en loop
@@ -36,11 +34,9 @@ function startMainMusic() {
 
         // Event listeners para la música principal
         backgroundMusic.addEventListener('error', (e) => {
-            console.warn('⚠️ Error cargando música principal:', e);
         });
 
         backgroundMusic.addEventListener('canplaythrough', () => {
-            console.log('🎵 Música principal lista para reproducir');
         });
 
         // Reproducir música principal
@@ -49,15 +45,12 @@ function startMainMusic() {
         if (playPromise !== undefined) {
             playPromise
                 .then(() => {
-                    console.log('🎵 ✅ Música principal iniciada y sonando continuamente');
                 })
                 .catch(error => {
-                    console.warn('⚠️ Error reproduciendo música principal:', error);
                 });
         }
 
     } catch (error) {
-        console.warn('⚠️ Error iniciando música principal:', error);
     }
 }
 
@@ -67,7 +60,6 @@ function startMainMusic() {
  */
 function playNPCSound(trackKey) {
     if (!musicEnabled || !MUSIC_FILES[trackKey]) {
-        console.warn(`⚠️ Sonido NPC no válido o música deshabilitada: ${trackKey}`);
         return;
     }
 
@@ -75,11 +67,9 @@ function playNPCSound(trackKey) {
     if (npcMusic) {
         npcMusic.pause();
         npcMusic.currentTime = 0;
-        console.log('🎵 Parando sonido NPC anterior');
     }
 
     try {
-        console.log(`🎵 Reproduciendo sonido NPC UNA VEZ: ${trackKey}`);
 
         // Crear nueva instancia para el sonido del NPC
         npcMusic = new Audio(MUSIC_FILES[trackKey]);
@@ -89,16 +79,13 @@ function playNPCSound(trackKey) {
 
         // Event listeners para sonido NPC
         npcMusic.addEventListener('error', (e) => {
-            console.warn(`⚠️ Error cargando sonido NPC ${trackKey}:`, e);
         });
 
         npcMusic.addEventListener('canplaythrough', () => {
-            console.log(`🎵 Sonido NPC ${trackKey} listo para reproducir`);
         });
 
         // ⭐ IMPORTANTE: Limpiar la referencia cuando termine
         npcMusic.addEventListener('ended', () => {
-            console.log(`🎵 Sonido NPC ${trackKey} terminó de reproducirse`);
             npcMusic = null;
             updateMusicButton();
         });
@@ -109,16 +96,13 @@ function playNPCSound(trackKey) {
         if (playPromise !== undefined) {
             playPromise
                 .then(() => {
-                    console.log(`🎵 ✅ Sonido NPC ${trackKey} reproduciéndose una vez`);
                     updateMusicButton();
                 })
                 .catch(error => {
-                    console.warn(`⚠️ Error reproduciendo sonido NPC ${trackKey}:`, error);
                 });
         }
 
     } catch (error) {
-        console.warn(`⚠️ Error iniciando sonido NPC ${trackKey}:`, error);
     }
 }
 
@@ -130,7 +114,6 @@ function stopNPCSound() {
         npcMusic.pause();
         npcMusic.currentTime = 0;
         npcMusic = null;
-        console.log('🎵 Sonido NPC detenido inmediatamente');
         updateMusicButton();
     }
 }
@@ -198,20 +181,16 @@ function playMainMusic() {
  */
 function initializeMusic() {
     if (musicInitialized || !musicEnabled) {
-        console.log('🎵 Sistema de música ya inicializado o deshabilitado');
         return;
     }
 
-    console.log('🎵 Inicializando sistema de música...');
 
     try {
         musicInitialized = true;
         startMainMusic(); // Iniciar música principal inmediatamente
 
-        console.log('🎵 ✅ Sistema de música inicializado exitosamente');
 
     } catch (error) {
-        console.warn('⚠️ Error inicializando música:', error);
         musicEnabled = false;
         musicInitialized = false;
     }
@@ -225,13 +204,11 @@ function pauseMusic() {
 
     if (backgroundMusic && !backgroundMusic.paused) {
         backgroundMusic.pause();
-        console.log('⏸️ Música principal pausada');
         pausedSomething = true;
     }
 
     if (npcMusic && !npcMusic.paused) {
         npcMusic.pause();
-        console.log('⏸️ Sonido NPC pausado');
         pausedSomething = true;
     }
 
@@ -248,17 +225,13 @@ function resumeMusic() {
 
     if (backgroundMusic && backgroundMusic.paused) {
         backgroundMusic.play().catch(error => {
-            console.warn('⚠️ Error reanudando música principal:', error);
         });
-        console.log('▶️ Música principal reanudada');
         resumedSomething = true;
     }
 
     if (npcMusic && npcMusic.paused) {
         npcMusic.play().catch(error => {
-            console.warn('⚠️ Error reanudando sonido NPC:', error);
         });
-        console.log('▶️ Sonido NPC reanudado');
         resumedSomething = true;
     }
 
@@ -278,13 +251,11 @@ function toggleMusic() {
         newMutedState = !backgroundMusic.muted;
 
         backgroundMusic.muted = newMutedState;
-        console.log(newMutedState ? '🔇 Música principal silenciada' : '🔊 Música principal activada');
     }
 
     // Aplicar el mismo estado al sonido NPC si existe
     if (npcMusic) {
         npcMusic.muted = newMutedState;
-        console.log(newMutedState ? '🔇 Sonido NPC silenciado' : '🔊 Sonido NPC activado');
     }
 
     updateMusicButton();
@@ -300,12 +271,10 @@ function setMusicVolume(volume) {
 
     if (backgroundMusic) {
         backgroundMusic.volume = clampedVolume;
-        console.log(`🎵 Volumen música principal ajustado a: ${Math.round(clampedVolume * 100)}%`);
     }
 
     if (npcMusic) {
         npcMusic.volume = clampedVolume;
-        console.log(`🎵 Volumen sonido NPC ajustado a: ${Math.round(clampedVolume * 100)}%`);
     }
 }
 
@@ -376,7 +345,6 @@ function updateMusicButton() {
  */
 function startGameMusic() {
     if (!musicInitialized) {
-        console.log('🎵 Iniciando sistema de música...');
         initializeMusic();
     } else {
         // Asegurar que la música principal esté sonando

@@ -36,7 +36,6 @@ function startGame() {
     // Reanudar el juego si estaba pausado
     resumeGame();
 
-    console.log('Juego iniciado - Modal cerrado');
 
     // Asegurar que los controles táctiles sean visibles si están habilitados
     if (typeof touchControls !== 'undefined' && touchControls.enabled) {
@@ -154,7 +153,7 @@ function setupMobileLayout() {
         document.head.appendChild(newViewport);
     }
 
-    console.log('📱 Layout móvil configurado');
+
 }
 
 /**
@@ -260,7 +259,7 @@ function initializeGame() {
     // Configurar event listeners del modal
     if (startGameBtn) {
         startGameBtn.addEventListener('click', () => {
-            console.log('Botón "Comenzar Juego" presionado');
+
             startGame();
         });
 
@@ -268,7 +267,7 @@ function initializeGame() {
         if (typeof isMobileDevice === 'function' && isMobileDevice()) {
             startGameBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                console.log('Botón "Comenzar Juego" tocado');
+
                 startGame();
             });
         }
@@ -276,7 +275,7 @@ function initializeGame() {
 
     if (helpBtn) {
         helpBtn.addEventListener('click', () => {
-            console.log('Botón de ayuda presionado');
+
             showInstructions();
         });
 
@@ -284,7 +283,7 @@ function initializeGame() {
         if (typeof isMobileDevice === 'function' && isMobileDevice()) {
             helpBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                console.log('Botón de ayuda tocado');
+
                 showInstructions();
             });
         }
@@ -302,13 +301,7 @@ function initializeGame() {
     // Iniciar el loop del juego
     gameLoop();
 
-    // Log de inicialización con información del dispositivo
-    const deviceInfo = (typeof isMobileDevice === 'function' && isMobileDevice()) ? '📱 Móvil' : '🖥️ Escritorio';
-    console.log(`🎮 Dvdrg Farm inicializado - ${deviceInfo}`);
 
-    if (typeof getInputSystemInfo === 'function') {
-        console.log('🎯 Sistema de input:', getInputSystemInfo());
-    }
 }
 
 /**
@@ -325,7 +318,6 @@ function handleOrientationChange() {
             updateTouchControlsVisibility();
         }
 
-        console.log('📱 Orientación cambiada, layout actualizado');
     }, 100);
 }
 
