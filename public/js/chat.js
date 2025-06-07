@@ -187,8 +187,8 @@ function addMobileChatControls() {
  */
 function initializeChatHistory() {
     // Inicializar historial vacío para cada NPC conocido
-    chatHistory.set('Blue NPC', []);
-    chatHistory.set('Green NPC', []);
+    chatHistory.set('Linda NPC', []);
+    chatHistory.set('Fannie NPC', []);
 }
 
 /**
@@ -303,7 +303,7 @@ function updateChatHeader() {
         chatHeader.style.color = gameState.activeNPC.chatColor;
 
         // Añadir emoji según el NPC para mejor identificación visual
-        const npcEmoji = gameState.activeNPC.name.includes('Blue') ? '🐄' : '🐑';
+        const npcEmoji = gameState.activeNPC.name.includes('Linda') ? '🐄' : '🐑';
         chatHeader.textContent = `${npcEmoji} ${chatHeader.textContent}`;
     }
 }
@@ -346,7 +346,7 @@ function closeChat() {
  */
 function showInteractionHint() {
     if (gameState.activeNPC) {
-        const npcEmoji = gameState.activeNPC.name.includes('Blue') ? '🐄' : '🐑';
+        const npcEmoji = gameState.activeNPC.name.includes('Linda') ? '🐄' : '🐑';
 
         if (isMobileDevice()) {
             interactionHint.textContent = `${npcEmoji} Touch the yellow button to talk to ${gameState.activeNPC.name}`;
@@ -383,7 +383,7 @@ function displayMessage(text, sender = 'user', saveToHistory = true) {
         senderName = '🧑🏼‍🌾 My';
         senderColor = '#ff0000'; // Color del círculo rojo
     } else {
-        const npcEmoji = gameState.activeNPC?.name.includes('Blue') ? '🐄' : '🐑';
+        const npcEmoji = gameState.activeNPC?.name.includes('Linda') ? '🐄' : '🐑';
         senderName = gameState.activeNPC ? `${npcEmoji} ${gameState.activeNPC.name}` : 'NPC';
         senderColor = gameState.activeNPC ? gameState.activeNPC.chatColor : '#666';
     }
@@ -432,7 +432,7 @@ async function generateBotResponse(userMessage) {
 
     try {
         // Mostrar indicador de carga (no guardar en historial)
-        const loadingMessage = displayMessage("Pensando... 🤔", "bot", false);
+        const loadingMessage = displayMessage("Translating into human language...", "bot", false);
 
         const response = await fetch('/api/claude', {
             method: 'POST',
@@ -454,13 +454,13 @@ async function generateBotResponse(userMessage) {
         if (data.success) {
             displayMessage(data.message, "bot", true);
         } else {
-            displayMessage("¡Oops! Algo salió mal. Intenta de nuevo.", "bot", true);
+            displayMessage("¡Oops! Cannot translating", "bot", true);
         }
 
     } catch (error) {
-        console.error('Error al comunicarse con Claude:', error);
-        const errorEmoji = gameState.activeNPC.name.includes('Blue') ? '🐄' : '🐑';
-        displayMessage(`No puedo conectarme ahora. ¿Intentamos más tarde? ${errorEmoji}`, "bot", true);
+        console.error('Error communicating with Claude:', error);
+        const errorEmoji = gameState.activeNPC.name.includes('Linda') ? '🐄' : '🐑';
+        displayMessage(`Error communicating with ClaudeCan't connect now, try again later? ${errorEmoji}`, "bot", true);
     }
 }
 
@@ -475,7 +475,7 @@ function sendMessage() {
     }
 
     if (!gameState.activeNPC) {
-        console.error('No hay NPC activo para enviar mensaje');
+        console.error('No NPC active to send message');
         return;
     }
 
@@ -518,7 +518,7 @@ function resetAllChatHistory() {
     chatHistory.clear();
     initializeChatHistory();
     clearChatDisplay();
-    console.log('Todos los historiales de chat han sido reiniciados');
+    // console.log('Todos los historiales de chat han sido reiniciados');
 }
 
 /**
@@ -590,10 +590,5 @@ function initializeChatHandlers() {
             }
         `;
         document.head.appendChild(style);
-
-        console.log('📱 Chat móvil configurado');
     }
-
-    // Log para debugging
-    console.log('Sistema de chat individualizado inicializado');
 }
