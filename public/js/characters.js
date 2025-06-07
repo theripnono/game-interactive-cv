@@ -336,6 +336,14 @@ const redCircle = {
     speed: RED_CIRCLE_CONFIG.speed
 };
 
+// AGREGAR ESTAS LÍNEAS para el sprite del granjero:
+redCircle.currentFrame = 0;
+redCircle.frameCounter = 0;
+redCircle.spriteImage = null;
+redCircle.spriteLoaded = false;
+redCircle.isMoving = false;
+redCircle.facingDirection = 'down'; // CORREGIDO: dirección por defecto hacia abajo
+
 // Crear círculos NPC con personalidades mejoradas
 const blueCircle = new NPCCircle(BLUE_CIRCLE_CONFIG, BLUE_PERSONALITY);
 
@@ -359,21 +367,48 @@ const npcCircles = [blueCircle, greenCircle];
  * Actualiza la posición del círculo rojo basándose en las teclas presionadas
  */
 function updateRedCirclePosition() {
+    // Detectar si hay movimiento para la animación
+    let wasMoving = redCircle.isMoving;
+    redCircle.isMoving = false;
+
+    // Variables para detectar dirección
+    let movingUp = false;
+    let movingDown = false;
+    let movingHorizontal = false;
+
     // Movimiento vertical
     if (keys.w || keys.ArrowUp) {
         redCircle.y -= redCircle.speed;
+        redCircle.isMoving = true;
+        movingUp = true;
     }
     if (keys.s || keys.ArrowDown) {
         redCircle.y += redCircle.speed;
+        redCircle.isMoving = true;
+        movingDown = true;
     }
 
     // Movimiento horizontal
     if (keys.a || keys.ArrowLeft) {
         redCircle.x -= redCircle.speed;
+        redCircle.isMoving = true;
+        movingHorizontal = true;
     }
     if (keys.d || keys.ArrowRight) {
         redCircle.x += redCircle.speed;
+        redCircle.isMoving = true;
+        movingHorizontal = true;
     }
+
+    // Establecer dirección: horizontal tiene prioridad (para diagonales)
+    if (movingHorizontal) {
+        redCircle.facingDirection = 'side'; // Perfil para cualquier movimiento horizontal
+    } else if (movingUp) {
+        redCircle.facingDirection = 'up';   // Mirando arriba solo si no hay horizontal
+    } else if (movingDown) {
+        redCircle.facingDirection = 'down'; // Mirando abajo solo si no hay horizontal
+    }
+    // Si no hay movimiento, mantener la dirección actual
 
     // Aplicar restricciones según la configuración
     if (RED_CIRCLE_CONFIG.restrictToArea) {

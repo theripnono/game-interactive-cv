@@ -35,6 +35,16 @@ const SPRITE_CONFIG = {
     animationSpeed: 8, // Frames del juego entre cada frame de sprite
 
     sprites: {
+        red: { // Círculo rojo = granjero (jugador)
+            src: 'assets/farm/sprites/farmer_walk.png',
+            frameWidth: 32,    // Cada frame mide 32px (asumiendo proporción similar)
+            frameHeight: 32,   // Cada frame mide 32px 
+            totalFrames: 6,    // (6 frames)
+            rows: 3,
+            layout: 'horizontal',
+            scale: 4.0         // Tamaño apropiado para el jugador
+
+        },
         blue: { // NPC azul = vaca
             src: 'assets/farm/sprites/BASIC_cow_walk.png',
             frameWidth: 32,    // 128 ÷ 4 = 32 píxeles por frame

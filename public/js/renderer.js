@@ -49,6 +49,34 @@ function initializeBackground() {
  * Inicializa y carga los sprites
  */
 function initializeSprites() {
+    // Cargar sprite del granjero para el círculo rojo (jugador)
+    const farmerSprite = new Image();
+
+    farmerSprite.onload = function () {
+        console.log('Sprite de granjero cargado exitosamente');
+        console.log(`Dimensiones del sprite: ${farmerSprite.width}x${farmerSprite.height}`);
+        redCircle.spriteImage = farmerSprite;
+        redCircle.spriteLoaded = true;
+        spriteImages.farmer = farmerSprite;
+
+        // Configurar renderizado pixelado para sprites
+        ctx.imageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.msImageSmoothingEnabled = false;
+
+        // Renderizar después de cargar el sprite
+        render();
+    };
+
+    farmerSprite.onerror = function () {
+        console.warn('No se pudo cargar el sprite de granjero desde assets/farm/sprites/farmer_walk.png');
+        console.warn('El círculo rojo se mostrará como círculo');
+        redCircle.spriteLoaded = false;
+    };
+
+    farmerSprite.src = 'assets/farm/sprites/farmer_walk.png';
+
     // Cargar sprite de la vaca para el NPC azul
     const cowSprite = new Image();
 
@@ -160,7 +188,6 @@ function clearCanvas() {
  */
 function drawSprite(circle, spriteConfig) {
     if (!circle.spriteImage || !circle.spriteLoaded) {
-        // Fallback: dibujar círculo normal si no carga el sprite
         drawCircleOriginal(circle);
         return;
     }
@@ -173,9 +200,28 @@ function drawSprite(circle, spriteConfig) {
     // Calcular frame actual basado en la velocidad de animación
     const frameIndex = Math.floor(circle.frameCounter / SPRITE_CONFIG.animationSpeed) % spriteConfig.totalFrames;
 
-    // Posición en el sprite sheet (horizontal)
-    const sourceX = frameIndex * spriteConfig.frameWidth;
-    const sourceY = 0; // Solo una fila
+    // Determinar fila según el tipo de sprite y dirección
+    let sourceY = 0;
+    let sourceX = frameIndex * spriteConfig.frameWidth;
+
+    // Si es el granjero (jugador) y tiene dirección
+    // CAMBIAR LA CONDICIÓN: quitar la verificación de spriteConfig.rows
+    if (circle === redCircle && circle.facingDirection) {
+        switch (circle.facingDirection) {
+            case 'down':
+                sourceY = 0; // Fila 1: mirando hacia abajo
+                break;
+            case 'up':
+                sourceY = spriteConfig.frameHeight; // Fila 2: mirando hacia arriba
+                break;
+            case 'side':
+                sourceY = spriteConfig.frameHeight * 2; // Fila 3: perfil
+                break;
+            default:
+                sourceY = 0; // Default: abajo
+                break;
+        }
+    }
 
     // Tamaño final en canvas
     const drawWidth = spriteConfig.frameWidth * spriteConfig.scale;
@@ -277,6 +323,12 @@ function drawCircleOriginal(circle) {
  * @param {Object} circle - El círculo a dibujar
  */
 function drawCircle(circle) {
+    // Si es el círculo rojo (jugador) y tiene sprite cargado, usar sprite de granjero
+    if (circle === redCircle && circle.spriteLoaded && SPRITE_CONFIG.sprites.red) {
+        drawSprite(circle, SPRITE_CONFIG.sprites.red);
+        return;
+    }
+
     // Si es el NPC azul y tiene sprite cargado, usar sprite de vaca
     if (circle === blueCircle && circle.spriteLoaded && SPRITE_CONFIG.sprites.blue) {
         drawSprite(circle, SPRITE_CONFIG.sprites.blue);
@@ -289,7 +341,7 @@ function drawCircle(circle) {
         return;
     }
 
-    // Si no, dibujar círculo normal (para red circle o si no cargan los sprites)
+    // Si no, dibujar círculo normal (fallback si no cargan los sprites)
     drawCircleOriginal(circle);
 }
 
@@ -314,7 +366,12 @@ function updatePositionDisplay() {
         interactionStatus = ` | Can interact with ${gameState.activeNPC.name}!`;
     }
 
-    let displayText = `Red Circle - X: ${Math.round(redCircle.x)}, Y: ${Math.round(redCircle.y)}<br>`;
+    // Información del jugador (granjero)
+    let displayText = `Red Circle (Farmer) - X: ${Math.round(redCircle.x)}, Y: ${Math.round(redCircle.y)}`;
+    if (redCircle.spriteLoaded) {
+        displayText += ` | Frame: ${Math.floor(redCircle.frameCounter / SPRITE_CONFIG.animationSpeed) % SPRITE_CONFIG.sprites.red.totalFrames} | Moving: ${redCircle.isMoving} | Facing: ${redCircle.facingDirection}`;
+    }
+    displayText += `<br>`;
 
     // Añadir información del NPC azul (vaca)
     displayText += `Blue Circle (Cow) - X: ${Math.round(blueCircle.x)}, Y: ${Math.round(blueCircle.y)} | Status: ${blueCircle.getStatusText()}`;
@@ -333,9 +390,10 @@ function updatePositionDisplay() {
 
     // Añadir información del fondo y sprites
     const backgroundStatus = backgroundLoaded ? 'Background: Loaded' : 'Background: Using fallback';
+    const farmerSpriteStatus = redCircle.spriteLoaded ? 'Farmer sprite: Loaded' : 'Farmer sprite: Using fallback';
     const cowSpriteStatus = blueCircle.spriteLoaded ? 'Cow sprite: Loaded' : 'Cow sprite: Using fallback';
     const sheepSpriteStatus = greenCircle.spriteLoaded ? 'Sheep sprite: Loaded' : 'Sheep sprite: Using fallback';
-    displayText += `<br>${backgroundStatus} | ${cowSpriteStatus} | ${sheepSpriteStatus}`;
+    displayText += `<br>${backgroundStatus}<br>${farmerSpriteStatus} | ${cowSpriteStatus} | ${sheepSpriteStatus}`;
 
     positionDisplay.innerHTML = displayText;
 }
