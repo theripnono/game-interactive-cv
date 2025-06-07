@@ -345,7 +345,7 @@ function showInteractionHint() {
         const npcEmoji = gameState.activeNPC.name.includes('Blue') ? '🐄' : '🐑';
 
         if (isMobileDevice()) {
-            interactionHint.textContent = `${npcEmoji} Toca el botón amarillo para hablar con ${gameState.activeNPC.name}`;
+            interactionHint.textContent = `${npcEmoji} Touch the yellow button to talk to ${gameState.activeNPC.name}`;
         } else {
             interactionHint.textContent = `${npcEmoji} Press SPACE to talk to ${gameState.activeNPC.name}`;
         }
@@ -376,7 +376,7 @@ function displayMessage(text, sender = 'user', saveToHistory = true) {
     let senderName, senderColor;
 
     if (sender === 'user') {
-        senderName = '🧑🏼‍🌾 Tú';
+        senderName = '🧑🏼‍🌾 My';
         senderColor = '#ff0000'; // Color del círculo rojo
     } else {
         const npcEmoji = gameState.activeNPC?.name.includes('Blue') ? '🐄' : '🐑';
@@ -545,11 +545,7 @@ function initializeChatHandlers() {
         const style = document.createElement('style');
         style.textContent = `
             @media (max-width: 768px) {
-                #dialogBox {
-                    margin: 10px;
-                    max-width: calc(100vw - 20px);
-                    max-height: 80vh;
-                }
+                
                 
                 #chatMessages {
                     max-height: 300px;

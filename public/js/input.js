@@ -390,7 +390,7 @@ function updateTouchInteractionButton() {
         button.innerHTML = '💬';
 
         // Mostrar indicador
-        indicator.textContent = `Toca para hablar con ${gameState.activeNPC.name}`;
+        indicator.textContent = `Touch to talk to ${gameState.activeNPC.name}`;
         indicator.style.opacity = '1';
 
         // Efecto de pulso

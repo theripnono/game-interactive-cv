@@ -357,22 +357,7 @@
 
 /* Estilos mejorados para el chat en móviles */
 @media (max-width: 768px) {
-    #dialogBox {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: calc(100vw - 20px);
-        max-width: 400px;
-        max-height: 80vh;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        overflow: hidden;
-        z-index: 1002;
-    }
+
 
     #chatMessages {
         max-height: 300px;
@@ -542,12 +527,6 @@
 
 /* Estilos para el teclado virtual */
 @media (max-height: 500px) and (orientation: portrait) {
-
-    /* Cuando el teclado virtual está abierto */
-    #dialogBox {
-        max-height: 60vh;
-        transform: translate(-50%, -60%);
-    }
 
     #chatMessages {
         max-height: 200px;
