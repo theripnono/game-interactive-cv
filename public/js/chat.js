@@ -253,6 +253,9 @@ function openChat() {
     dialogBox.classList.remove('hidden');
     hideInteractionHint();
 
+
+    switchMusicForNPC(gameState.activeNPC);
+
     // Actualizar el título del chat con el nombre del NPC
     updateChatHeader();
 
@@ -312,6 +315,7 @@ function closeChat() {
     setDialogState(false);
     dialogBox.classList.add('hidden');
 
+    stopNPCMusic();
     // Restaurar estilos modificados para móviles
     if (isMobileDevice()) {
         dialogBox.style.transform = '';

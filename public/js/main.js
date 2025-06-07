@@ -14,6 +14,8 @@ const instructionsModal = document.getElementById('instructionsModal');
 const startGameBtn = document.getElementById('startGameBtn');
 const helpBtn = document.getElementById('helpBtn');
 
+
+
 /**
  * Funciones para manejar el modal de instrucciones
  */
@@ -27,6 +29,9 @@ function startGame() {
 
     // Mostrar botón de ayuda
     helpBtn.classList.remove('hidden');
+
+    startGameMusic();
+
 
     // Reanudar el juego si estaba pausado
     resumeGame();
