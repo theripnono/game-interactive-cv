@@ -11,7 +11,7 @@
     align-items: center;
     z-index: 2000;
     /* Patrón de dithering para simular transparencia pixelada */
-    background-image: 
+    background-image:
         radial-gradient(circle at 25% 25%, rgba(42, 42, 42, 0.5) 1px, transparent 1px),
         radial-gradient(circle at 75% 75%, rgba(42, 42, 42, 0.5) 1px, transparent 1px);
     background-size: 4px 4px;
@@ -47,9 +47,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
-        linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%);
+    background-image:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%);
     background-size: 16px 16px;
     background-position: 0 0, 8px 8px;
     pointer-events: none;
@@ -146,7 +146,7 @@
 .game-description p {
     margin: 6px 0;
     color: var(--text-primary);
-    font-size: 13px;
+    font-size: 20px;
     line-height: 1.4;
 }
 
@@ -171,10 +171,11 @@
 .farm-info p {
     margin: 4px 0;
     color: var(--success-color);
-    font-size: 12px;
+    font-size: 17px;
     line-height: 1.3;
     font-weight: bold;
 }
+
 /* Botón para comenzar el juego */
 .start-game-btn {
     background-color: var(--primary-color);
@@ -246,6 +247,7 @@
     0% {
         opacity: 0;
     }
+
     100% {
         opacity: 1;
     }
@@ -256,22 +258,27 @@
         transform: scale(0.5) translateY(-50px);
         opacity: 0;
     }
+
     20% {
         transform: scale(0.7) translateY(-30px);
         opacity: 0.3;
     }
+
     40% {
         transform: scale(0.9) translateY(-10px);
         opacity: 0.6;
     }
+
     60% {
         transform: scale(1.1) translateY(5px);
         opacity: 0.8;
     }
+
     80% {
         transform: scale(1.05) translateY(0);
         opacity: 0.9;
     }
+
     100% {
         transform: scale(1) translateY(0);
         opacity: 1;
@@ -280,10 +287,14 @@
 
 /* Efecto de parpadeo para elementos importantes */
 @keyframes pixelBlink {
-    0%, 50% {
+
+    0%,
+    50% {
         opacity: 1;
     }
-    51%, 100% {
+
+    51%,
+    100% {
         opacity: 0.5;
     }
 }
