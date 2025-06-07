@@ -1,0 +1,596 @@
+/**
+ * movil-style.css - Estilos específicos para dispositivos móviles
+ * Mejora la experiencia táctil y responsive del juego
+ */
+
+/* Estilos base para dispositivos móviles */
+@media (max-width: 768px) {
+
+    /* Prevenir zoom accidental */
+    * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Permitir selección de texto en inputs y areas de texto */
+    input,
+    textarea,
+    [contenteditable] {
+        -webkit-user-select: text;
+        -khtml-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+
+    /* Contenedor principal del juego */
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        touch-action: manipulation;
+    }
+
+    /* Contenedor del canvas */
+    .game-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 10px;
+        padding-bottom: 140px;
+        /* Espacio para controles táctiles */
+    }
+
+    /* Canvas del juego */
+    #gameCanvas {
+        max-width: 100vw;
+        max-height: 70vh;
+        width: auto;
+        height: auto;
+        display: block;
+        touch-action: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Modal de instrucciones */
+    #instructionsModal {
+        padding: 15px;
+        margin: 10px;
+    }
+
+    #instructionsModal .instructions-content {
+        max-width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Botones principales */
+    button {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 16px;
+        font-size: 16px;
+        border-radius: 8px;
+        touch-action: manipulation;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    button:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+
+    /* CORREGIDO: Indicador de interacción - sin animación automática */
+    #interactionHint {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        text-align: center;
+        max-width: 200px;
+        z-index: 1001;
+        backdrop-filter: blur(5px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        /* Comportamiento controlado por JavaScript */
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: none;
+    }
+
+    /* Estado visible del hint */
+    #interactionHint:not(.hidden) {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Estado oculto del hint */
+    #interactionHint.hidden {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+        pointer-events: none;
+    }
+}
+
+/* Estilos para pantallas muy pequeñas (teléfonos en vertical) */
+@media (max-width: 480px) {
+    #gameCanvas {
+        max-height: 65vh;
+    }
+
+    #instructionsModal {
+        padding: 10px;
+        margin: 5px;
+    }
+
+    #instructionsModal h3 {
+        font-size: 18px;
+    }
+
+    #instructionsModal p {
+        font-size: 14px;
+    }
+
+    /* CORREGIDO: Hint más pequeño en pantallas pequeñas */
+    #interactionHint {
+        font-size: 11px;
+        padding: 6px 10px;
+        max-width: 180px;
+        border-radius: 12px;
+    }
+
+    .game-container {
+        padding-bottom: 120px;
+    }
+}
+
+/* Estilos para orientación horizontal */
+@media (orientation: landscape) and (max-height: 500px) {
+    #gameCanvas {
+        max-height: 60vh;
+    }
+
+    #instructionsModal .instructions-content {
+        max-height: 85vh;
+    }
+
+    /* CORREGIDO: En landscape, mover el hint hacia arriba */
+    #interactionHint {
+        top: 30%;
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .game-container {
+        padding-bottom: 100px;
+    }
+}
+
+/* Controles táctiles específicos */
+#touchControls {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+    user-select: none;
+}
+
+/* Joystick virtual */
+#joystickArea {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 120px;
+    height: 120px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    pointer-events: auto;
+    touch-action: none;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+#joystickArea:active {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.7);
+    transform: scale(1.05);
+}
+
+#joystickKnob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.1s ease;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Botón de interacción */
+#interactionButton {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 0, 0.8);
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    pointer-events: auto;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#interactionButton:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 0, 1);
+}
+
+/* MEJORADO: Indicador del botón de interacción - más discreto */
+#interactionIndicator {
+    position: absolute;
+    bottom: 130px;
+    right: 30px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 15px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    max-width: 160px;
+    text-align: center;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Animación de pulso para el botón de interacción */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(255, 255, 0, 0.4);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 480px) {
+    #joystickArea {
+        width: 100px;
+        height: 100px;
+        bottom: 15px;
+        left: 15px;
+    }
+
+    #joystickKnob {
+        width: 35px;
+        height: 35px;
+    }
+
+    #interactionButton {
+        width: 70px;
+        height: 70px;
+        bottom: 30px;
+        right: 30px;
+        font-size: 20px;
+    }
+
+    #interactionIndicator {
+        bottom: 105px;
+        right: 20px;
+        font-size: 10px;
+        max-width: 140px;
+        padding: 4px 8px;
+    }
+}
+
+/* Ajustes para orientación horizontal */
+@media (orientation: landscape) and (max-height: 500px) {
+    #joystickArea {
+        bottom: 10px;
+        left: 10px;
+        width: 90px;
+        height: 90px;
+    }
+
+    #joystickKnob {
+        width: 30px;
+        height: 30px;
+    }
+
+    #interactionButton {
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        font-size: 18px;
+    }
+
+    #interactionIndicator {
+        bottom: 85px;
+        right: 10px;
+        font-size: 9px;
+        max-width: 120px;
+        padding: 3px 6px;
+    }
+}
+
+/* Estilos mejorados para el chat en móviles */
+@media (max-width: 768px) {
+
+
+    #chatMessages {
+        max-height: 300px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    #chatInput {
+        width: 100%;
+        min-height: 20px;
+        max-height: 120px;
+        font-size: 16px !important;
+        padding: 12px !important;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        resize: none;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    #chatInput:focus {
+        border-color: #4CAF50;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+
+    .message {
+        margin: 8px 0;
+        padding: 12px;
+        border-radius: 12px;
+        word-wrap: break-word;
+        animation: messageSlideIn 0.3s ease;
+    }
+
+    .user-message {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        margin-left: 20px;
+        border-bottom-right-radius: 4px;
+    }
+
+    .bot-message {
+        background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+        margin-right: 20px;
+        border-bottom-left-radius: 4px;
+    }
+
+    .message-sender {
+        font-weight: bold;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .message-text {
+        font-size: 15px;
+        line-height: 1.4;
+        color: #333;
+    }
+
+    /* Botones del chat */
+    #sendMessage {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        min-height: 44px;
+        touch-action: manipulation;
+        transition: all 0.2s ease;
+    }
+
+    #sendMessage:active {
+        transform: scale(0.95);
+        background: linear-gradient(135deg, #45a049, #3d8b40);
+    }
+
+    #closeChatBtn,
+    #closeChat {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        min-height: 44px;
+        min-width: 44px;
+        touch-action: manipulation;
+        transition: all 0.2s ease;
+    }
+
+    #closeChatBtn:active,
+    #closeChat:active {
+        transform: scale(0.95);
+        background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    }
+}
+
+/* Animaciones */
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mejoras de accesibilidad para táctil */
+@media (pointer: coarse) {
+
+    /* Aumentar áreas táctiles en dispositivos touch */
+    button,
+    input,
+    select,
+    textarea {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Mejorar hover states para touch */
+    button:hover {
+        opacity: 0.9;
+    }
+
+    /* Eliminar outlines de focus en touch devices */
+    button:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+    }
+}
+
+/* Estados de carga y transiciones */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.touch-feedback {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+/* Prevenir selección de texto en elementos de interfaz */
+.no-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Scroll suave en móviles */
+.smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Estilos para el teclado virtual */
+@media (max-height: 500px) and (orientation: portrait) {
+
+    #chatMessages {
+        max-height: 200px;
+    }
+}
+
+/* Estilos adicionales para mejorar la experiencia */
+.help-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1003;
+}
+
+@media (max-width: 768px) {
+    .help-btn {
+        top: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+
+/* Mejoras para el header en móviles */
+@media (max-width: 768px) {
+    .pixel-header {
+        padding: 10px 15px;
+    }
+
+    .pixel-navbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .navbar-brand {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .navbar-nav {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .nav-link {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+}
+
+/* Estilos para dispositivos con notch */
+@supports (padding: max(0px)) {
+    @media (max-width: 768px) {
+        body {
+            padding-left: max(10px, env(safe-area-inset-left));
+            padding-right: max(10px, env(safe-area-inset-right));
+        }
+
+        #touchControls {
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    }
+}
