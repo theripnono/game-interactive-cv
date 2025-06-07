@@ -1,19 +1,19 @@
 /**
  * music.js - Sistema de música dinámico MULTI-PISTA para el juego
- * Maneja música de fondo principal CONTINUA + música específica por NPC SIMULTÁNEA
+ * Música principal CONTINUA + sonidos de NPC DE UNA SOLA VEZ
  */
 
 // Variables para el sistema multi-pista
 let backgroundMusic = null;      // Música principal (SIEMPRE sonando)
-let npcMusic = null;            // Música específica del NPC actual
+let npcMusic = null;            // Sonido específico del NPC actual (una vez)
 let musicInitialized = false;
 let musicEnabled = true;
 
 // Configuración de archivos de música
 const MUSIC_FILES = {
     main: 'assets/music/main_theme.mp3',
-    cow: 'assets/music/cow.mp3',     // Música para Linda (vaca)
-    sheep: 'assets/music/sheep.mp3'  // Música para Fannie (oveja)
+    cow: 'assets/music/cow.mp3',     // Sonido para Linda (vaca)
+    sheep: 'assets/music/sheep.mp3'  // Sonido para Fannie (oveja)
 };
 
 /**
@@ -30,7 +30,7 @@ function startMainMusic() {
         console.log('🎵 Iniciando música principal...');
 
         backgroundMusic = new Audio(MUSIC_FILES.main);
-        backgroundMusic.loop = true;
+        backgroundMusic.loop = true; // ✅ Música principal SÍ en loop
         backgroundMusic.volume = 0.3;
         backgroundMusic.preload = 'auto';
 
@@ -62,112 +62,128 @@ function startMainMusic() {
 }
 
 /**
- * Reproduce música específica de NPC ADEMÁS de la música principal
+ * Reproduce sonido específico de NPC UNA SOLA VEZ
  * @param {string} trackKey - Clave de la pista ('cow', 'sheep')
  */
-function playNPCMusic(trackKey) {
+function playNPCSound(trackKey) {
     if (!musicEnabled || !MUSIC_FILES[trackKey]) {
-        console.warn(`⚠️ Pista NPC no válida o música deshabilitada: ${trackKey}`);
+        console.warn(`⚠️ Sonido NPC no válido o música deshabilitada: ${trackKey}`);
         return;
     }
 
-    // Si ya hay música de NPC sonando, pararla primero
+    // Si ya hay sonido de NPC reproduciéndose, pararlo primero
     if (npcMusic) {
         npcMusic.pause();
         npcMusic.currentTime = 0;
-        console.log('🎵 Parando música NPC anterior');
+        console.log('🎵 Parando sonido NPC anterior');
     }
 
     try {
-        console.log(`🎵 Iniciando música NPC: ${trackKey}`);
+        console.log(`🎵 Reproduciendo sonido NPC UNA VEZ: ${trackKey}`);
 
-        // Crear nueva instancia para la música del NPC
+        // Crear nueva instancia para el sonido del NPC
         npcMusic = new Audio(MUSIC_FILES[trackKey]);
-        npcMusic.loop = true;
-        npcMusic.volume = 0.25; // Volumen ligeramente menor para no competir con la principal
+        npcMusic.loop = false; // ⭐ CLAVE: NO loop, solo una vez
+        npcMusic.volume = 0.4; // Volumen del sonido del animal
         npcMusic.preload = 'auto';
 
-        // Event listeners para música NPC
+        // Event listeners para sonido NPC
         npcMusic.addEventListener('error', (e) => {
-            console.warn(`⚠️ Error cargando música NPC ${trackKey}:`, e);
+            console.warn(`⚠️ Error cargando sonido NPC ${trackKey}:`, e);
         });
 
         npcMusic.addEventListener('canplaythrough', () => {
-            console.log(`🎵 Música NPC ${trackKey} lista para reproducir`);
+            console.log(`🎵 Sonido NPC ${trackKey} listo para reproducir`);
         });
 
-        // Reproducir música NPC
+        // ⭐ IMPORTANTE: Limpiar la referencia cuando termine
+        npcMusic.addEventListener('ended', () => {
+            console.log(`🎵 Sonido NPC ${trackKey} terminó de reproducirse`);
+            npcMusic = null;
+            updateMusicButton();
+        });
+
+        // Reproducir sonido NPC
         const playPromise = npcMusic.play();
 
         if (playPromise !== undefined) {
             playPromise
                 .then(() => {
-                    console.log(`🎵 ✅ Música NPC ${trackKey} reproduciendo junto con la principal`);
+                    console.log(`🎵 ✅ Sonido NPC ${trackKey} reproduciéndose una vez`);
                     updateMusicButton();
                 })
                 .catch(error => {
-                    console.warn(`⚠️ Error reproduciendo música NPC ${trackKey}:`, error);
+                    console.warn(`⚠️ Error reproduciendo sonido NPC ${trackKey}:`, error);
                 });
         }
 
     } catch (error) {
-        console.warn(`⚠️ Error iniciando música NPC ${trackKey}:`, error);
+        console.warn(`⚠️ Error iniciando sonido NPC ${trackKey}:`, error);
     }
 }
 
 /**
- * Para la música específica del NPC (mantiene la principal sonando)
+ * Para el sonido específico del NPC inmediatamente
  */
-function stopNPCMusic() {
+function stopNPCSound() {
     if (npcMusic) {
         npcMusic.pause();
         npcMusic.currentTime = 0;
         npcMusic = null;
-        console.log('🎵 Música NPC detenida, música principal continúa');
+        console.log('🎵 Sonido NPC detenido inmediatamente');
         updateMusicButton();
     }
 }
 
 /**
- * Reproduce la música de la vaca (Linda) ADEMÁS de la principal
+ * Reproduce el sonido de la vaca (Linda) UNA VEZ
  */
-function playCowMusic() {
-    playNPCMusic('cow');
+function playCowSound() {
+    playNPCSound('cow');
 }
 
 /**
- * Reproduce la música de la oveja (Fannie) ADEMÁS de la principal
+ * Reproduce el sonido de la oveja (Fannie) UNA VEZ
  */
-function playSheepMusic() {
-    playNPCMusic('sheep');
+function playSheepSound() {
+    playNPCSound('sheep');
 }
 
 /**
- * Cambia automáticamente la música según el NPC activo
- * NUEVA LÓGICA: Añade música de NPC sin parar la principal
+ * Reproduce sonido según el NPC activo cuando se abre el chat
  * @param {Object} npc - El NPC activo
  */
-function switchMusicForNPC(npc) {
+function playNPCIntroSound(npc) {
     // La música principal SIEMPRE debe estar sonando
     if (!backgroundMusic || backgroundMusic.paused) {
         startMainMusic();
     }
 
     if (!npc) {
-        // Si no hay NPC, solo parar música de NPC
-        stopNPCMusic();
         return;
     }
 
-    // Añadir música específica según el NPC
+    // Reproducir sonido específico UNA VEZ según el NPC
     if (npc.name === 'Linda') {
-        playCowMusic();
+        playCowSound();
     } else if (npc.name === 'Fannie') {
-        playSheepMusic();
-    } else {
-        // Para otros NPCs, solo música principal
-        stopNPCMusic();
+        playSheepSound();
     }
+    // Para otros NPCs, no reproducir sonido adicional
+}
+
+/**
+ * Función de compatibilidad con el código existente
+ */
+function switchMusicForNPC(npc) {
+    playNPCIntroSound(npc);
+}
+
+/**
+ * Función de compatibilidad - alias para stopNPCSound
+ */
+function stopNPCMusic() {
+    stopNPCSound();
 }
 
 /**
@@ -175,11 +191,10 @@ function switchMusicForNPC(npc) {
  */
 function playMainMusic() {
     startMainMusic();
-    // No parar música NPC si está sonando
 }
 
 /**
- * Inicializa el sistema de música multi-pista
+ * Inicializa el sistema de música
  */
 function initializeMusic() {
     if (musicInitialized || !musicEnabled) {
@@ -187,13 +202,13 @@ function initializeMusic() {
         return;
     }
 
-    console.log('🎵 Inicializando sistema de música multi-pista...');
+    console.log('🎵 Inicializando sistema de música...');
 
     try {
         musicInitialized = true;
         startMainMusic(); // Iniciar música principal inmediatamente
 
-        console.log('🎵 ✅ Sistema de música multi-pista inicializado exitosamente');
+        console.log('🎵 ✅ Sistema de música inicializado exitosamente');
 
     } catch (error) {
         console.warn('⚠️ Error inicializando música:', error);
@@ -203,7 +218,7 @@ function initializeMusic() {
 }
 
 /**
- * Pausa TODA la música (principal + NPC)
+ * Pausa TODA la música (principal + cualquier sonido NPC)
  */
 function pauseMusic() {
     let pausedSomething = false;
@@ -216,7 +231,7 @@ function pauseMusic() {
 
     if (npcMusic && !npcMusic.paused) {
         npcMusic.pause();
-        console.log('⏸️ Música NPC pausada');
+        console.log('⏸️ Sonido NPC pausado');
         pausedSomething = true;
     }
 
@@ -226,7 +241,7 @@ function pauseMusic() {
 }
 
 /**
- * Reanuda TODA la música (principal + NPC)
+ * Reanuda TODA la música (principal + cualquier sonido NPC)
  */
 function resumeMusic() {
     let resumedSomething = false;
@@ -241,9 +256,9 @@ function resumeMusic() {
 
     if (npcMusic && npcMusic.paused) {
         npcMusic.play().catch(error => {
-            console.warn('⚠️ Error reanudando música NPC:', error);
+            console.warn('⚠️ Error reanudando sonido NPC:', error);
         });
-        console.log('▶️ Música NPC reanudada');
+        console.log('▶️ Sonido NPC reanudado');
         resumedSomething = true;
     }
 
@@ -266,10 +281,10 @@ function toggleMusic() {
         console.log(newMutedState ? '🔇 Música principal silenciada' : '🔊 Música principal activada');
     }
 
-    // Aplicar el mismo estado a la música NPC
+    // Aplicar el mismo estado al sonido NPC si existe
     if (npcMusic) {
         npcMusic.muted = newMutedState;
-        console.log(newMutedState ? '🔇 Música NPC silenciada' : '🔊 Música NPC activada');
+        console.log(newMutedState ? '🔇 Sonido NPC silenciado' : '🔊 Sonido NPC activado');
     }
 
     updateMusicButton();
@@ -289,14 +304,13 @@ function setMusicVolume(volume) {
     }
 
     if (npcMusic) {
-        // Música NPC ligeramente más baja
-        npcMusic.volume = clampedVolume * 0.8;
-        console.log(`🎵 Volumen música NPC ajustado a: ${Math.round(clampedVolume * 80)}%`);
+        npcMusic.volume = clampedVolume;
+        console.log(`🎵 Volumen sonido NPC ajustado a: ${Math.round(clampedVolume * 100)}%`);
     }
 }
 
 /**
- * Obtiene el estado actual del sistema de música multi-pista
+ * Obtiene el estado actual del sistema de música
  */
 function getMusicStatus() {
     const mainStatus = backgroundMusic ? {
@@ -318,13 +332,13 @@ function getMusicStatus() {
     return {
         initialized: musicInitialized,
         mainMusic: mainStatus,
-        npcMusic: npcStatus,
-        hasNPCMusic: npcMusic !== null
+        npcSound: npcStatus,
+        hasNPCSound: npcMusic !== null
     };
 }
 
 /**
- * Actualiza la apariencia del botón según el estado multi-pista
+ * Actualiza la apariencia del botón según el estado
  */
 function updateMusicButton() {
     const button = document.getElementById('musicToggle');
@@ -342,9 +356,14 @@ function updateMusicButton() {
         button.title = 'Música silenciada - Clic para activar';
         button.style.opacity = '0.7';
     } else {
-        // Mostrar estado según si hay música NPC
+        // Mostrar estado según si hay sonido NPC reproduciéndose
         let emoji = '🎵';
         let trackInfo = 'Principal';
+
+        if (status.hasNPCSound && status.npcSound && status.npcSound.playing) {
+            emoji = '🎵+🔊';
+            trackInfo = 'Principal + Sonido Animal';
+        }
 
         button.innerHTML = emoji;
         button.title = `Música activada: ${trackInfo} - Clic para silenciar`;
@@ -357,7 +376,7 @@ function updateMusicButton() {
  */
 function startGameMusic() {
     if (!musicInitialized) {
-        console.log('🎵 Iniciando sistema de música multi-pista...');
+        console.log('🎵 Iniciando sistema de música...');
         initializeMusic();
     } else {
         // Asegurar que la música principal esté sonando
@@ -385,7 +404,7 @@ function resumeGameMusic() {
     }
 }
 
-// Crear el botón cuando se carga el script (función existente sin cambios)
+// Crear el botón cuando se carga el script
 function createMusicToggleButton() {
     // Verificar si ya existe el botón
     if (document.getElementById('musicToggle')) {
@@ -397,7 +416,7 @@ function createMusicToggleButton() {
     button.innerHTML = '🎵';
     button.title = 'Activar/Silenciar música';
 
-    // Estilos del botón (sin cambios)
+    // Estilos del botón
     button.style.cssText = `
         position: fixed;
         top: 20px;
@@ -419,7 +438,7 @@ function createMusicToggleButton() {
         justify-content: center;
     `;
 
-    // Efectos hover y active (sin cambios)
+    // Efectos hover y active
     button.addEventListener('mouseenter', () => {
         button.style.background = 'rgba(0, 0, 0, 0.9)';
         button.style.transform = 'scale(1.1)';
@@ -449,7 +468,7 @@ function createMusicToggleButton() {
         }
     });
 
-    // Soporte táctil para móviles (sin cambios)
+    // Soporte táctil para móviles
     if (typeof isMobileDevice === 'function' && isMobileDevice()) {
         button.addEventListener('touchend', (e) => {
             e.preventDefault();
