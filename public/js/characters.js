@@ -374,7 +374,8 @@ function updateRedCirclePosition() {
     // Variables para detectar dirección
     let movingUp = false;
     let movingDown = false;
-    let movingHorizontal = false;
+    let movingLeft = false;
+    let movingRight = false;
 
     // Movimiento vertical
     if (keys.w || keys.ArrowUp) {
@@ -392,21 +393,23 @@ function updateRedCirclePosition() {
     if (keys.a || keys.ArrowLeft) {
         redCircle.x -= redCircle.speed;
         redCircle.isMoving = true;
-        movingHorizontal = true;
+        movingLeft = true;
     }
     if (keys.d || keys.ArrowRight) {
         redCircle.x += redCircle.speed;
         redCircle.isMoving = true;
-        movingHorizontal = true;
+        movingRight = true;
     }
 
     // Establecer dirección: horizontal tiene prioridad (para diagonales)
-    if (movingHorizontal) {
-        redCircle.facingDirection = 'side'; // Perfil para cualquier movimiento horizontal
+    if (movingLeft) {
+        redCircle.facingDirection = 'left';
+    } else if (movingRight) {
+        redCircle.facingDirection = 'right';
     } else if (movingUp) {
-        redCircle.facingDirection = 'up';   // Mirando arriba solo si no hay horizontal
+        redCircle.facingDirection = 'up';
     } else if (movingDown) {
-        redCircle.facingDirection = 'down'; // Mirando abajo solo si no hay horizontal
+        redCircle.facingDirection = 'down';
     }
     // Si no hay movimiento, mantener la dirección actual
 

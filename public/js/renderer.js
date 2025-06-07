@@ -197,15 +197,15 @@ function drawSprite(circle, spriteConfig) {
         circle.frameCounter++;
     }
 
-    // Calcular frame actual basado en la velocidad de animación
+    // Calcular frame actual
     const frameIndex = Math.floor(circle.frameCounter / SPRITE_CONFIG.animationSpeed) % spriteConfig.totalFrames;
 
-    // Determinar fila según el tipo de sprite y dirección
+    // Determinar fila y si necesita espejo
     let sourceY = 0;
     let sourceX = frameIndex * spriteConfig.frameWidth;
+    let needsMirror = false; // NUEVA VARIABLE
 
     // Si es el granjero (jugador) y tiene dirección
-    // CAMBIAR LA CONDICIÓN: quitar la verificación de spriteConfig.rows
     if (circle === redCircle && circle.facingDirection) {
         switch (circle.facingDirection) {
             case 'down':
@@ -214,8 +214,13 @@ function drawSprite(circle, spriteConfig) {
             case 'up':
                 sourceY = spriteConfig.frameHeight; // Fila 2: mirando hacia arriba
                 break;
-            case 'side':
-                sourceY = spriteConfig.frameHeight * 2; // Fila 3: perfil
+            case 'right':
+                sourceY = spriteConfig.frameHeight * 2; // Fila 3: perfil derecha
+                needsMirror = false; // No espejo, sprite original
+                break;
+            case 'left':
+                sourceY = spriteConfig.frameHeight * 2; // Fila 3: perfil (misma fila)
+                needsMirror = true; // ¡ESPEJO ACTIVADO!
                 break;
             default:
                 sourceY = 0; // Default: abajo
@@ -226,24 +231,38 @@ function drawSprite(circle, spriteConfig) {
     // Tamaño final en canvas
     const drawWidth = spriteConfig.frameWidth * spriteConfig.scale;
     const drawHeight = spriteConfig.frameHeight * spriteConfig.scale;
-
-    // Posición centrada en la posición del círculo
     const drawX = circle.x - drawWidth / 2;
     const drawY = circle.y - drawHeight / 2;
 
     // Guardar contexto para sombra
     ctx.save();
+
     ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
     ctx.shadowBlur = 6;
     ctx.shadowOffsetX = 3;
     ctx.shadowOffsetY = 3;
 
-    // Dibujar el sprite
-    ctx.drawImage(
-        circle.spriteImage,
-        sourceX, sourceY, spriteConfig.frameWidth, spriteConfig.frameHeight,
-        drawX, drawY, drawWidth, drawHeight
-    );
+    // APLICAR ESPEJO SI ES NECESARIO
+
+    if (needsMirror) {
+        // Mover el contexto al centro del sprite
+        ctx.translate(circle.x, circle.y);
+        // Voltear horizontalmente
+        ctx.scale(-1, 1);
+        // Dibujar el sprite centrado en el origen transformado
+        ctx.drawImage(
+            circle.spriteImage,
+            sourceX, sourceY, spriteConfig.frameWidth, spriteConfig.frameHeight,
+            -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight
+        );
+    } else {
+        // Dibujar normalmente sin espejo
+        ctx.drawImage(
+            circle.spriteImage,
+            sourceX, sourceY, spriteConfig.frameWidth, spriteConfig.frameHeight,
+            drawX, drawY, drawWidth, drawHeight
+        );
+    }
 
     // Restaurar contexto
     ctx.restore();

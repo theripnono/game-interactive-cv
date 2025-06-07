@@ -14,16 +14,16 @@ const BACKGROUND_CONFIG = {
     imagePath: 'assets/farm/farm_background.png',
     fallbackColor: '#4a5d23', // Verde campo
     patternColor: '#3a4d13',  // Verde más oscuro para el patrón
-    patternSize: 40,          // Tamaño de los cuadros del patrón
-    scaleMode: 'cover'        // 'cover', 'contain', 'stretch'
+    patternSize: 30,          // Tamaño de los cuadros del patrón
+    // scaleMode: 'cover',        // 'cover', 'contain', 'stretch'
 };
 
 // NUEVA: Configuración del área de movimiento restringida
 const MOVEMENT_AREA = {
     xMin: 170,
     xMax: 640,
-    yMin: 265,    // Nota: yMin es el valor más pequeño (parte superior)
-    yMax: 510,    // yMax es el valor más grande (parte inferior)
+    yMin: 200,    // Nota: yMin es el valor más pequeño (parte superior)
+    yMax: 420,    // yMax es el valor más grande (parte inferior)
     // Propiedades calculadas automáticamente
     get width() { return this.xMax - this.xMin; },
     get height() { return this.yMax - this.yMin; },
@@ -32,7 +32,7 @@ const MOVEMENT_AREA = {
 };
 
 const SPRITE_CONFIG = {
-    animationSpeed: 8, // Frames del juego entre cada frame de sprite
+    animationSpeed: 4, // Frames del juego entre cada frame de sprite
 
     sprites: {
         red: { // Círculo rojo = granjero (jugador)
@@ -92,7 +92,7 @@ const GREEN_CIRCLE_CONFIG = {
     color: '#00cc44',
     strokeColor: '#009933',
     speed: 9,
-    waitInterval: 180,        // 3 segundos - menos tiempo de espera
+    waitInterval: 120,        // 3 segundos - menos tiempo de espera
     minDistance: 60,          // Ajustado para el área más pequeña
     maxDistance: 180,         // Ajustado para el área restringida
     movementVariability: 1.2,
@@ -118,7 +118,7 @@ const RENDER_CONFIG = {
     shadowAlpha: 0.4,         // Transparencia de sombras
     interactionGlowSize: 8,   // Tamaño del brillo de interacción
     pulseSpeed: 0.01,         // Velocidad del efecto de pulso
-    showMovementArea: true    // NUEVA: Mostrar el área de movimiento visualmente
+    showMovementArea: true    // Mostrar el área de movimiento visualmente
 };
 
 // Configuración avanzada de movimiento (modificada para área restringida)
