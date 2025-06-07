@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🌽 Dvdrg Porfolio 🌽</title>
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/movil-style.css">
 </head>
 <body>
     <!-- Header con navegación -->
@@ -31,14 +32,8 @@
                 <p>This is a prompt engineering adventure where intelligent AI acts as different farm animals. Chat with each character to discover their unique personalities, learn about their daily lives on the farm, and explore their individual stories and perspectives.</p>
             </div>
             
-            <h3>Controls:</h3>
-            <p>Move the red circle using:</p>
-            <p>
-                <span class="key-hint">W</span> <span class="key-hint">A</span> <span class="key-hint">S</span> <span class="key-hint">D</span> keys or arrow keys 
-                <span class="key-hint">↑</span> <span class="key-hint">←</span> <span class="key-hint">↓</span> <span class="key-hint">→</span>
-            </p>
-            <p>When near any farm animal, press <span class="key-hint">SPACE</span> to start a conversation</p>
-            <p>Close dialogs with <span class="key-hint">ESC</span> or by clicking "Close"</p>
+            <h3>How to Play:</h3>
+            <!-- Las instrucciones específicas se insertarán aquí dinámicamente -->
             
             <div class="farm-info">
                 <p><em>🐄 Each animal has its own personality, memories, and stories to share!</em></p>
@@ -81,7 +76,9 @@
         </div>
     </div>
 
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
     
     <div class="controls" style="display: none;"></div>
 
@@ -94,6 +91,6 @@
     <script src="js/chat.js"></script>
     <script src="js/renderer.js"></script>
     <script src="js/main.js"></script>
-     <script src="js/navbar.js"></script>
+    <script src="js/navbar.js"></script>
 </body>
 </html>
