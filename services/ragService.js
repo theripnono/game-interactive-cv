@@ -1,6 +1,6 @@
 /**
- * Servicio RAG (Retrieval-Augmented Generation) para gestionar búsquedas semánticas
- * Integra OpenAI para embeddings y Qdrant para búsqueda vectorial
+ * Servicio RAG mejorado para trabajar con chunks semánticamente optimizados
+ * Integra OpenAI para embeddings y Qdrant para búsqueda vectorial con metadatos enriquecidos
  */
 
 export class RAGService {
@@ -11,11 +11,22 @@ export class RAGService {
             apiKey: qdrantConfig.apiKey,
             collectionName: qdrantConfig.collectionName || 'cv_embeddings'
         };
-        this.embeddingModel = 'text-embedding-3-small';
+        this.embeddingModel = 'text-embedding-ada-002';
+
+        this.searchConfig = {
+            defaultLimit: 3,
+            scoreThreshold: 0.5,
+            fallbackThreshold: 0.3,
+            maxContextLength: 2000
+        };
     }
 
+    // ==========================================
+    // MÉTODOS DE DETECCIÓN Y VALIDACIÓN
+    // ==========================================
+
     /**
-     * Verificar si una consulta es sobre CV/información personal
+     * ✅ Verificación más inteligente de consultas CV
      */
     isAboutCV(message) {
         if (!message || typeof message !== 'string') {
@@ -23,44 +34,197 @@ export class RAGService {
         }
 
         const messageLower = message.toLowerCase();
-        const cvKeywords = [
-            'david', 'farmer', 'granjero',
-            'experience', 'experiencia',
-            'skill', 'habilidad', 'habilidades',
-            'education', 'educación',
-            'background', 'trasfondo',
-            'work', 'trabajo',
-            'career', 'carrera',
-            'qualification', 'cualificación'
-        ];
+
+        const cvKeywords = {
+            personal: ['david', 'farmer', 'granjero', 'rosset', 'gomez'],
+            professional: [
+                'experience', 'experiencia', 'trabajo', 'work', 'career', 'carrera',
+                'job', 'position', 'puesto', 'role', 'empresa', 'company'
+            ],
+            technical: [
+                'skill', 'skills', 'habilidad', 'habilidades', 'technology', 'tecnologia',
+                'python', 'javascript', 'aws', 'data', 'ai', 'ml', 'langchain',
+                'programming', 'programacion', 'desarrollo', 'development', 'technical', 'soft'
+            ],
+            educational: [
+                'education', 'educacion', 'master', 'degree', 'university', 'universidad',
+                'study', 'estudios', 'qualification', 'cualificacion', 'course', 'curso',
+                'courses', 'cursos', 'training', 'formacion'
+            ],
+            projects: [
+                'project', 'proyecto', 'projects', 'proyectos', 'github', 'portfolio',
+                'build', 'create', 'develop', 'desarrollar'
+            ],
+            languages: [
+                'language', 'languages', 'idioma', 'idiomas', 'speak', 'habla',
+                'english', 'spanish', 'french', 'ingles', 'español', 'frances'
+            ],
+            contact: [
+                'contact', 'contacto', 'email', 'phone', 'telefono', 'reach',
+                'communicate', 'comunicar', 'call', 'llamar'
+            ],
+            interests: [
+                'interests', 'intereses', 'hobbies', 'personal', 'like', 'gusta',
+                'enjoy', 'disfruta', 'passion', 'pasion'
+            ]
+        };
 
         console.log(`🔍 DEBUG: Analizando mensaje: "${message}"`);
-        console.log(`🔍 DEBUG: Mensaje en minúsculas: "${messageLower}"`);
 
-        const matches = cvKeywords.filter(keyword => messageLower.includes(keyword));
-        const isAbout = matches.length > 0;
+        // Calcular matches por categoría
+        const matches = {};
+        let totalMatches = 0;
 
-        console.log(`🔍 DEBUG: Palabras clave encontradas: [${matches.join(', ')}]`);
+        Object.entries(cvKeywords).forEach(([category, keywords]) => {
+            const categoryMatches = keywords.filter(keyword => messageLower.includes(keyword));
+            matches[category] = categoryMatches;
+            totalMatches += categoryMatches.length;
+        });
+
+        const isAbout = totalMatches >= 1 ||
+            matches.personal.length > 0 ||
+            (matches.professional.length > 0 && matches.technical.length > 0);
+
+        console.log(`🔍 DEBUG: Matches por categoría:`, matches);
+        console.log(`🔍 DEBUG: Total matches: ${totalMatches}`);
         console.log(`🔍 DEBUG: ¿Es sobre CV? ${isAbout}`);
 
         return isAbout;
     }
 
     /**
-     * Buscar información relevante del CV
+     * ✅ Detectar intención de la consulta
      */
-    async searchCVInformation(query, limit = 4) {
-        console.log('🔧 DEBUG: Iniciando búsqueda RAG');
+    detectQueryIntent(query) {
+        const queryLower = query.toLowerCase();
+
+        const intentPatterns = {
+            experience: {
+                keywords: ['experience', 'experiencia', 'trabajo', 'work', 'career', 'carrera', 'empresa', 'company', 'position', 'puesto', 'job'],
+                chunkTypes: ['work_experience', 'other_experience'],
+                limit: 3
+            },
+            skills: {
+                keywords: ['skill', 'skills', 'habilidad', 'habilidades', 'technology', 'tecnologia', 'python', 'javascript', 'aws', 'programming', 'programacion', 'technical'],
+                chunkTypes: ['technical_skills', 'soft_skills'],
+                limit: 3
+            },
+            projects: {
+                keywords: ['project', 'proyecto', 'projects', 'github', 'build', 'develop', 'desarrollar', 'portfolio'],
+                chunkTypes: ['projects'],
+                limit: 2
+            },
+            education: {
+                keywords: ['education', 'educacion', 'master', 'university', 'universidad', 'study', 'estudios', 'degree', 'titulo', 'course', 'curso'],
+                chunkTypes: ['education', 'courses'],
+                limit: 3
+            },
+            personal: {
+                keywords: ['who', 'quien', 'background', 'about', 'personal', 'interests', 'hobbies', 'contact', 'contacto'],
+                chunkTypes: ['profile', 'personal_interests', 'contact'],
+                limit: 3
+            },
+            languages: {
+                keywords: ['language', 'languages', 'idioma', 'idiomas', 'speak', 'habla', 'english', 'spanish', 'frances'],
+                chunkTypes: ['languages'],
+                limit: 2
+            },
+            courses: {
+                keywords: ['course', 'courses', 'curso', 'cursos', 'training', 'formacion', 'certification', 'certificacion'],
+                chunkTypes: ['courses'],
+                limit: 2
+            },
+            contact: {
+                keywords: ['contact', 'contacto', 'email', 'phone', 'telefono', 'reach', 'communicate'],
+                chunkTypes: ['contact'],
+                limit: 1
+            }
+        };
+
+        // Detectar intención con mayor peso
+        let bestIntent = { type: 'general', chunkTypes: null, limit: 3 };
+        let maxScore = 0;
+
+        Object.entries(intentPatterns).forEach(([intentType, config]) => {
+            const score = config.keywords.reduce((acc, keyword) => {
+                return acc + (queryLower.includes(keyword) ? 1 : 0);
+            }, 0);
+
+            if (score > maxScore) {
+                maxScore = score;
+                bestIntent = { type: intentType, ...config };
+            }
+        });
+
+        console.log(`🎯 Intent: ${bestIntent.type} (score: ${maxScore})`);
+        console.log(`🏷️ Chunk types a filtrar: ${bestIntent.chunkTypes || 'ninguno'}`);
+
+        return bestIntent;
+    }
+
+    /**
+     * ✅ Validar chunk_types
+     */
+    async validateChunkTypes(chunkTypes) {
+        const validChunkTypes = [
+            'courses', 'other_experience', 'work_experience', 'languages',
+            'profile', 'personal_interests', 'technical_skills', 'education',
+            'projects', 'soft_skills', 'contact'
+        ];
+
+        if (!chunkTypes || !Array.isArray(chunkTypes)) {
+            return null;
+        }
+
+        const validTypes = chunkTypes.filter(type => validChunkTypes.includes(type));
+
+        if (validTypes.length !== chunkTypes.length) {
+            const invalidTypes = chunkTypes.filter(type => !validChunkTypes.includes(type));
+            console.warn(`⚠️ Chunk types inválidos ignorados: ${invalidTypes.join(', ')}`);
+        }
+
+        return validTypes.length > 0 ? validTypes : null;
+    }
+
+    // ==========================================
+    // MÉTODOS DE BÚSQUEDA PRINCIPALES
+    // ==========================================
+
+    /**
+     * ✅ Búsqueda inteligente con detección automática de tipo
+     */
+    async searchByIntent(query) {
+        const intent = this.detectQueryIntent(query);
+        console.log(`🎯 Intent detectado: ${intent.type}`);
+
+        const searchOptions = {
+            limit: intent.limit,
+            chunkTypes: intent.chunkTypes
+        };
+
+        return await this.searchCVInformation(query, searchOptions);
+    }
+
+    /**
+     * ✅ Búsqueda con filtros por tipo de chunk y metadatos
+     */
+    async searchCVInformation(query, options = {}) {
+        const {
+            limit = this.searchConfig.defaultLimit,
+            chunkTypes = null,
+            includeMetadata = true
+        } = options;
+
+        console.log('🔧 DEBUG: Iniciando búsqueda RAG mejorada');
         console.log(`🔧 DEBUG: Query: "${query}"`);
-        console.log(`🔧 DEBUG: Limit: ${limit}`);
+        console.log(`🔧 DEBUG: Chunk types filter:`, chunkTypes);
 
         try {
-            // Validar configuración
             if (!this.validateConfiguration()) {
                 throw new RAGError('RAG service not properly configured', 'CONFIG_ERROR');
             }
 
-            // Crear embedding de la consulta
+            // Crear embedding
             console.log('🔍 Creando embedding para la consulta...');
             const embedding = await this.createEmbedding(query);
 
@@ -68,15 +232,23 @@ export class RAGService {
                 throw new RAGError('Failed to create embedding', 'EMBEDDING_ERROR');
             }
 
-            // Buscar en Qdrant
-            console.log('🔍 Buscando en Qdrant...');
-            const searchResults = await this.searchInQdrant(embedding, limit);
+            // Búsqueda con filtros
+            console.log('🔍 Buscando en Qdrant con filtros...');
+            const searchResults = await this.searchWithFilters(embedding, {
+                limit,
+                chunkTypes,
+                scoreThreshold: this.searchConfig.scoreThreshold
+            });
 
             console.log(`📊 Encontrados ${searchResults.length} resultados`);
 
             if (searchResults.length === 0) {
-                console.log('⚠️ No se encontraron resultados, intentando búsqueda sin threshold...');
-                const fallbackResults = await this.searchWithoutThreshold(embedding, limit);
+                console.log('⚠️ No se encontraron resultados, intentando búsqueda fallback...');
+                const fallbackResults = await this.searchWithFilters(embedding, {
+                    limit: limit * 2,
+                    chunkTypes: null, // Sin filtros en fallback
+                    scoreThreshold: this.searchConfig.fallbackThreshold
+                });
                 return this.formatSearchResults(fallbackResults, query, true);
             }
 
@@ -94,14 +266,57 @@ export class RAGService {
     }
 
     /**
-     * Crear embedding usando OpenAI
+     * ✅ Búsqueda con filtros de metadatos (ÚNICA VERSIÓN)
+     */
+    async searchWithFilters(embedding, options = {}) {
+        const { limit, chunkTypes, scoreThreshold } = options;
+
+        // Validar chunk_types antes de usar
+        const validChunkTypes = await this.validateChunkTypes(chunkTypes);
+
+        // Construir filtros para Qdrant
+        let filter = null;
+        if (validChunkTypes && validChunkTypes.length > 0) {
+            filter = {
+                should: validChunkTypes.map(type => ({
+                    key: "chunk_type",
+                    match: { value: type }
+                }))
+            };
+        }
+
+        const searchPayload = {
+            vector: embedding,
+            limit: limit,
+            with_payload: true,
+            with_vector: false
+        };
+
+        // Añadir threshold y filtros si están definidos
+        if (scoreThreshold) {
+            searchPayload.score_threshold = scoreThreshold;
+        }
+        if (filter) {
+            searchPayload.filter = filter;
+        }
+
+        console.log('🔧 DEBUG: Payload de búsqueda:', JSON.stringify(searchPayload, null, 2));
+
+        return await this.executeQdrantSearch(searchPayload);
+    }
+
+    // ==========================================
+    // MÉTODOS DE EMBEDDING Y COMUNICACIÓN
+    // ==========================================
+
+    /**
+     * ✅ Crear embedding con retry y mejores configuraciones
      */
     async createEmbedding(text) {
         console.log('🔧 DEBUG: Iniciando createEmbedding');
         console.log(`🔧 DEBUG: Texto: "${text}" (${text?.length || 0} caracteres)`);
 
         try {
-            // Validar y limpiar texto
             const cleanText = this.preprocessText(text);
             if (!cleanText) {
                 throw new RAGError('Empty or invalid text for embedding', 'INVALID_TEXT');
@@ -113,25 +328,15 @@ export class RAGService {
                 encoding_format: 'float'
             };
 
-            console.log('🔧 DEBUG: Enviando solicitud a OpenAI...');
-
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
-
-            try {
+            return await this.callWithRetry(async () => {
                 const response = await fetch('https://api.openai.com/v1/embeddings', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${this.openaiApiKey.trim()}`
                     },
-                    body: JSON.stringify(requestBody),
-                    signal: controller.signal
+                    body: JSON.stringify(requestBody)
                 });
-
-                clearTimeout(timeoutId);
-
-                console.log(`🔧 DEBUG: OpenAI response status: ${response.status}`);
 
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -147,12 +352,8 @@ export class RAGService {
 
                 const embedding = data.data[0].embedding;
                 console.log(`✅ Embedding creado (dimensiones: ${embedding.length})`);
-
                 return embedding;
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
-                throw fetchError;
-            }
+            });
 
         } catch (error) {
             console.error('❌ Error creando embedding:', error);
@@ -161,65 +362,40 @@ export class RAGService {
     }
 
     /**
-     * Buscar en Qdrant con threshold
+     * ✅ Llamada con retry y backoff exponencial
      */
-    async searchInQdrant(embedding, limit, scoreThreshold = 0.3) {
-        const searchPayload = {
-            vector: embedding,
-            limit: limit,
-            score_threshold: scoreThreshold,
-            with_payload: true,
-            with_vector: false
-        };
+    async callWithRetry(operation, maxRetries = 3, baseDelay = 1000) {
+        let lastError;
 
-        console.log('🔧 DEBUG: Búsqueda en Qdrant con threshold:', scoreThreshold);
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return await operation();
+            } catch (error) {
+                lastError = error;
+                console.warn(`⚠️ Intento ${attempt}/${maxRetries} falló:`, error.message);
 
-        const response = await this.executeQdrantSearch(searchPayload);
-        const results = response.result || [];
+                if (attempt === maxRetries) break;
 
-        if (results.length > 0) {
-            this.logSearchResults(results);
+                const delay = baseDelay * Math.pow(2, attempt - 1);
+                console.log(`⏳ Esperando ${delay}ms antes del siguiente intento...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
         }
 
-        return results;
+        throw lastError;
     }
 
     /**
-     * Búsqueda en Qdrant sin threshold como fallback
-     */
-    async searchWithoutThreshold(embedding, limit) {
-        console.log('🔄 Ejecutando búsqueda sin threshold...');
-
-        const searchPayload = {
-            vector: embedding,
-            limit: limit,
-            with_payload: true,
-            with_vector: false
-            // Sin score_threshold
-        };
-
-        const response = await this.executeQdrantSearch(searchPayload);
-        const results = response.result || [];
-
-        console.log(`🔄 Búsqueda sin threshold: ${results.length} resultados`);
-
-        if (results.length > 0) {
-            this.logSearchResults(results);
-        }
-
-        return results;
-    }
-
-    /**
-     * Ejecutar búsqueda en Qdrant
+     * ✅ Ejecutar búsqueda en Qdrant
      */
     async executeQdrantSearch(searchPayload) {
         const searchUrl = `${this.qdrantConfig.url}/collections/${this.qdrantConfig.collectionName}/points/search`;
 
         console.log('🔧 DEBUG: URL de búsqueda:', searchUrl);
+        console.log('🔧 DEBUG: Colección:', this.qdrantConfig.collectionName);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         try {
             const response = await fetch(searchUrl, {
@@ -245,15 +421,25 @@ export class RAGService {
             const data = await response.json();
             console.log('🔧 DEBUG: Respuesta de Qdrant recibida');
 
-            return data;
+            const results = data.result || [];
+
+            if (results.length > 0) {
+                this.logSearchResults(results);
+            }
+
+            return results;
         } catch (fetchError) {
             clearTimeout(timeoutId);
             throw fetchError;
         }
     }
 
+    // ==========================================
+    // MÉTODOS DE FORMATEO Y UTILIDADES
+    // ==========================================
+
     /**
-     * Formatear contexto para Claude
+     * ✅ Formateo de contexto con metadatos enriquecidos
      */
     formatContextForClaude(searchResults) {
         if (!searchResults || searchResults.length === 0) {
@@ -262,15 +448,37 @@ export class RAGService {
 
         return searchResults
             .map((doc, index) => {
-                const content = doc.payload?.content || '';
-                const score = doc.score ? ` (relevancia: ${(doc.score * 100).toFixed(1)}%)` : '';
-                return `[Info CV ${index + 1}${score}]: ${content.trim()}`;
+                const payload = doc.payload || {};
+                const content = payload.content || '';
+                const score = doc.score ? ` (${(doc.score * 100).toFixed(1)}% relevancia)` : '';
+
+                let contextInfo = `[Info CV ${index + 1}${score}]`;
+
+                // Añadir metadatos específicos según el tipo
+                if (payload.chunk_type === 'work_experience' || payload.chunk_type === 'other_experience') {
+                    if (payload.company && payload.position) {
+                        contextInfo += ` [${payload.company} - ${payload.position}]`;
+                    }
+                    if (payload.dates) {
+                        contextInfo += ` [${payload.dates}]`;
+                    }
+                } else if (payload.chunk_type === 'technical_skills') {
+                    if (payload.skill_count) {
+                        contextInfo += ` [${payload.skill_count} skills]`;
+                    }
+                } else if (payload.chunk_type === 'projects') {
+                    if (payload.project_count) {
+                        contextInfo += ` [${payload.project_count} proyectos]`;
+                    }
+                }
+
+                return `${contextInfo}: ${content.trim()}`;
             })
-            .join('\n');
+            .join('\n\n');
     }
 
     /**
-     * Formatear resultados de búsqueda
+     * ✅ Formatear resultados de búsqueda
      */
     formatSearchResults(results, query, isFallback = false) {
         const contexts = results.filter(result => result.payload?.content);
@@ -284,13 +492,122 @@ export class RAGService {
                 totalResults: results.length,
                 validContexts: contexts.length,
                 avgScore: contexts.length > 0 ?
-                    contexts.reduce((sum, doc) => sum + (doc.score || 0), 0) / contexts.length : 0
+                    contexts.reduce((sum, doc) => sum + (doc.score || 0), 0) / contexts.length : 0,
+                chunkTypes: [...new Set(contexts.map(c => c.payload?.chunk_type).filter(Boolean))]
             }
         };
     }
 
     /**
-     * Validar configuración del servicio
+     * ✅ Logging de resultados con metadatos
+     */
+    logSearchResults(results) {
+        const scores = results.map(r => r.score?.toFixed(3) || 'N/A').join(', ');
+        console.log(`📈 Scores de relevancia: [${scores}]`);
+
+        results.forEach((result, index) => {
+            const payload = result.payload || {};
+            console.log(`🔧 DEBUG: Resultado ${index + 1}:`, {
+                score: result.score,
+                chunkType: payload.chunk_type,
+                section: payload.section,
+                company: payload.company,
+                skillCount: payload.skill_count,
+                contentPreview: payload.content?.substring(0, 100) || 'No content'
+            });
+        });
+    }
+
+    // ==========================================
+    // MÉTODOS DE ESTADÍSTICAS Y CONFIGURACIÓN
+    // ==========================================
+
+    /**
+     * ✅ Estadísticas por chunk_type
+     */
+    async getChunkTypeStats() {
+        try {
+            const allChunkTypes = [
+                'courses', 'other_experience', 'work_experience', 'languages',
+                'profile', 'personal_interests', 'technical_skills', 'education',
+                'projects', 'soft_skills', 'contact'
+            ];
+
+            const stats = {};
+
+            for (const chunkType of allChunkTypes) {
+                try {
+                    const countUrl = `${this.qdrantConfig.url}/collections/${this.qdrantConfig.collectionName}/points/count`;
+
+                    const response = await fetch(countUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'api-key': this.qdrantConfig.apiKey
+                        },
+                        body: JSON.stringify({
+                            filter: {
+                                must: [{
+                                    key: "chunk_type",
+                                    match: { value: chunkType }
+                                }]
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        stats[chunkType] = data.result?.count || 0;
+                    } else {
+                        stats[chunkType] = 'Error';
+                    }
+                } catch (error) {
+                    stats[chunkType] = 'Error';
+                }
+            }
+
+            return {
+                success: true,
+                stats: stats,
+                total: Object.values(stats).reduce((sum, count) =>
+                    typeof count === 'number' ? sum + count : sum, 0)
+            };
+        } catch (error) {
+            console.error('❌ Error obteniendo estadísticas por chunk_type:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * ✅ Estadísticas de la colección
+     */
+    async getCollectionStats() {
+        try {
+            const statsUrl = `${this.qdrantConfig.url}/collections/${this.qdrantConfig.collectionName}`;
+
+            const response = await fetch(statsUrl, {
+                method: 'GET',
+                headers: {
+                    'api-key': this.qdrantConfig.apiKey
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                return {
+                    success: true,
+                    stats: data.result
+                };
+            }
+        } catch (error) {
+            console.warn('⚠️ No se pudieron obtener estadísticas de la colección:', error.message);
+        }
+
+        return { success: false };
+    }
+
+    /**
+     * ✅ Validar configuración
      */
     validateConfiguration() {
         const hasOpenAI = this.openaiApiKey && this.openaiApiKey.trim() !== '';
@@ -298,35 +615,26 @@ export class RAGService {
 
         console.log(`🔧 DEBUG: OpenAI configurado: ${hasOpenAI}`);
         console.log(`🔧 DEBUG: Qdrant configurado: ${hasQdrant}`);
-
-        if (!hasOpenAI) {
-            console.warn('⚠️ OpenAI API key not configured');
-        }
-        if (!hasQdrant) {
-            console.warn('⚠️ Qdrant configuration incomplete');
-        }
+        console.log(`🔧 DEBUG: Colección: ${this.qdrantConfig.collectionName}`);
 
         return hasOpenAI && hasQdrant;
     }
 
     /**
-     * Preprocesar texto para embedding
+     * ✅ Preprocesar texto
      */
     preprocessText(text) {
         if (!text || typeof text !== 'string') {
             return null;
         }
 
-        // Limpiar y limitar texto
         const cleaned = text.trim().substring(0, 8000);
-
         console.log(`🔧 DEBUG: Texto limpio: "${cleaned}" (${cleaned.length} caracteres)`);
-
         return cleaned.length > 0 ? cleaned : null;
     }
 
     /**
-     * Validar respuesta de embedding
+     * ✅ Validar respuesta de embedding
      */
     validateEmbeddingResponse(data) {
         return data &&
@@ -338,7 +646,7 @@ export class RAGService {
     }
 
     /**
-     * Manejar errores de OpenAI API
+     * ✅ Manejar errores de OpenAI
      */
     handleOpenAIError(status, errorText) {
         switch (status) {
@@ -354,37 +662,22 @@ export class RAGService {
     }
 
     /**
-     * Logging de resultados de búsqueda
-     */
-    logSearchResults(results) {
-        const scores = results.map(r => r.score?.toFixed(3) || 'N/A').join(', ');
-        console.log(`📈 Scores de relevancia: [${scores}]`);
-
-        results.forEach((result, index) => {
-            console.log(`🔧 DEBUG: Resultado ${index + 1}:`, {
-                score: result.score,
-                hasPayload: !!result.payload,
-                contentPreview: result.payload?.content?.substring(0, 100) || 'No content'
-            });
-        });
-    }
-
-    /**
-     * Obtener estadísticas de uso
+     * ✅ Estadísticas de uso
      */
     getUsageStats() {
         return {
-            service: 'RAG',
+            service: 'RAG Enhanced',
             embeddingModel: this.embeddingModel,
             qdrantCollection: this.qdrantConfig.collectionName,
             configured: this.validateConfiguration(),
-            qdrantUrl: this.qdrantConfig.url
+            qdrantUrl: this.qdrantConfig.url,
+            searchConfig: this.searchConfig
         };
     }
 }
 
 /**
- * Clase de error personalizada para RAG
+ * ✅ Clase de error personalizada para RAG
  */
 export class RAGError extends Error {
     constructor(message, code) {
@@ -395,12 +688,24 @@ export class RAGError extends Error {
 }
 
 /**
- * Factory para crear instancia de RAGService
+ * ✅ Factory con validación de colección
  */
-export function createRAGService(openaiApiKey, qdrantConfig) {
+export async function createRAGService(openaiApiKey, qdrantConfig) {
     if (!openaiApiKey || !qdrantConfig.apiKey) {
         console.warn('⚠️ RAG Service creation skipped - missing required API keys');
         return null;
     }
-    return new RAGService(openaiApiKey, qdrantConfig);
+
+    const ragService = new RAGService(openaiApiKey, qdrantConfig);
+
+    // Verificar que la colección existe
+    const stats = await ragService.getCollectionStats();
+    if (stats.success) {
+        console.log(`✅ RAG Service conectado a colección: ${qdrantConfig.collectionName}`);
+        console.log(`📊 Vectores en colección: ${stats.stats?.vectors_count || 'N/A'}`);
+    } else {
+        console.warn(`⚠️ No se pudo verificar la colección: ${qdrantConfig.collectionName}`);
+    }
+
+    return ragService;
 }

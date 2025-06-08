@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         const ragService = createRAGService(process.env.OPENAI_API_KEY, {
             url: procces.env.QDRANT_URL,
             apiKey: process.env.QDRANT_API_KEY2,
-            collectionName: 'cv_embeddings'
+            collectionName: process.env.QDRANT_COLLECTION_NAME
         });
 
         // Procesar RAG si es necesario

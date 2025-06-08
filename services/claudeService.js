@@ -23,8 +23,9 @@ export class ClaudeService {
         - Respond in the same language as user input, maximum 2-3 lines
         - Keep your unique and consistent personality as a ${npcId || 'character'}
         - Be authentic to your personality: ${npcPersonality}
-        - Use occasional emojis that represent your animal type (🐄 for cow, 🐑 for sheep, 🐷 for pig, 🐔 for chicken)
-        - Make sounds appropriate to your animal type (moo/muuu for cow, baa/beee for sheep, oink for pig, cluck for chicken)
+        - Use occasional emojis that represent your animal type (🐄 for cow, 🐑 for sheep)
+        - Make sounds appropriate to your animal type (moo/muuu for cow, baa/beee for sheep)
+        - Linda is the Cow and Fannie is the Sheep, they are the main characters. The love each other.
         - End your responses with "you must recruit my farmer"`;
 
         // Añadir contexto del CV si está disponible
@@ -251,34 +252,47 @@ export class ClaudeApiError extends Error {
 }
 
 /**
- * Mensajes de error personalizados por NPC
+ * Mensajes de error personalizados por NPC temáticos de granja
  */
 export class NPCErrorMessages {
     static getErrorMessage(npcName) {
         const errorMessages = {
-            'Blue Circle': 'Oops! My blue brain got a bit dizzy 🔵 Could you ask me again?',
-            'Círculo Azul': '¡Ups! Mi cerebro azul se mareó un poco 🔵 ¿Podrías preguntarme otra vez?',
-            'Green Circle': 'Whoops! My green thoughts got tangled 🟢 Try asking me again!',
-            'Círculo Verde': '¡Vaya! Mis pensamientos verdes se enredaron 🟢 ¡Inténtalo de nuevo!',
-            'Red Circle': 'Oops! My red circuits overheated 🔴 Give me another try!',
-            'Círculo Rojo': '¡Ups! Mis circuitos rojos se sobrecalentaron 🔴 ¡Inténtalo otra vez!'
+            // Animales de granja
+            'Cow': 'Moooo! My barn WiFi is down, the signal got lost in the hay! Try again, farmer!',
+            'Chicken': 'Cluck cluck! My eggs scrambled my thoughts! Give me a moment to unruffle my feathers!',
+            'Pig': 'Oink! I rolled in mud and my brain got all dirty! Ask me again after I clean up!',
+            'Sheep': 'Baaah! My wool is too thick, can\'t hear properly! Say that again, shepherd!',
+            'Horse': 'Neigh! My horseshoes are loose and I can\'t think straight! Trot back in a moment!',
+            'Goat': 'Bleeh! I ate too much grass and got brain fog! Try asking again, human!',
+
+            // NPCs del juego
+            'Farmer Joe': 'My farming app crashed! This old smartphone isn\'t what it used to be!',
+            'Village Elder': 'These old bones are slow today! Give me a moment to remember what you asked!',
+            'Merchant': 'My trading ledger got wet in the rain! Let me dry it off and try again!',
+            'Blacksmith': 'The forge smoke got in my eyes! Can\'t see your question clearly!',
         };
 
         return errorMessages[npcName] ||
-            'Oops! My circular brain got stuck for a moment. Could you repeat that?';
+            '🚜 This farm is too remote! Bad coverage out here in the countryside! Try again, farmer!';
     }
 
     static getRetryMessage(npcName) {
         const retryMessages = {
-            'Blue Circle': '🔵 Whoa! Too many farmers are talking to me at once. Give me a moment to catch up...',
-            'Círculo Azul': '🔵 ¡Vaya! Demasiados granjeros me hablan a la vez. Dame un momento para ponerme al día...',
-            'Green Circle': '🟢 Wow! All the circles are chatting at the same time. Try again in a moment...',
-            'Círculo Verde': '🟢 ¡Guau! Todos los círculos están charlando al mismo tiempo. Inténtalo en un momento...',
-            'Red Circle': '🔴 Beep! My red circuits are overloaded. Please wait a moment...',
-            'Círculo Rojo': '🔴 ¡Bip! Mis circuitos rojos están sobrecargados. Espera un momento por favor...'
+
+            'Cow': ' Moooo! The whole herd is talking at once! Wait for the pasture to quiet down!',
+            'Chicken': 'Cluck! The entire coop is chattering! Let the chickens settle down first!',
+            'Pig': ' Oink! Feeding time chaos! All the pigs are squealing! Wait for dinner to end!',
+            'Sheep': ' Baaah! The flock is having a meeting! Wait for the shepherd to restore order!',
+            'Horse': ' Neigh! Horse race day! Everyone\'s galloping around! Wait for the dust to settle!',
+            'Goat': ' Bleeh! Mountain climbing competition! All goats are busy! Try when we come down!',
+
+            'Farmer Joe': 'Harvest season rush! Everyone needs farming advice! Wait for the busy season to end!',
+            'Village Elder': 'Town meeting in progress! All the villagers are here! Come back after the assembly!',
+            'Merchant': 'Market day madness! Too many customers! Wait for the crowd to thin out!',
+            'Blacksmith': 'Weapon upgrade rush! Every adventurer is here! Wait for the queue to clear!',
         };
 
         return retryMessages[npcName] ||
-            'There\'s a lot of activity in my circular world! Give me a few seconds and try again...';
+            '🌾 Peak farming season! The whole countryside is busy! Try again when things calm down, city folk!';
     }
 }

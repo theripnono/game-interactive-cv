@@ -2,8 +2,7 @@ import { ClaudeService, ClaudeApiError, NPCErrorMessages } from '../services/cla
 import { RAGService, createRAGService } from '../services/ragService.js';
 
 /**
- * Handler principal para el endpoint de Claude
- * Orquesta las llamadas a los servicios de Claude y RAG
+ * Handler mejorado para el endpoint de Claude con RAG optimizado
  */
 export default async function handler(req, res) {
     // Configurar CORS
@@ -47,20 +46,24 @@ export default async function handler(req, res) {
         // Inicializar servicios
         const claudeService = new ClaudeService(process.env.ANTHROPIC_API_KEY);
 
-        // Solo crear RAG service si las API keys están disponibles
+        // ✅ CAMBIO: Crear RAG service con colección mejorada
         let ragService = null;
         if (process.env.OPENAI_API_KEY && process.env.QDRANT_API_KEY2) {
-            ragService = createRAGService(process.env.OPENAI_API_KEY, {
-                url: process.env.QDRANT_URL || 'https://f18c8e30-d541-451a-8397-252eee5256ed.europe-west3-0.gcp.cloud.qdrant.io:6333',
+            ragService = await createRAGService(process.env.OPENAI_API_KEY, {
+                url: process.env.QDRANT_URL,
                 apiKey: process.env.QDRANT_API_KEY2,
-                collectionName: 'cv_embeddings'
+                collectionName: process.env.QDRANT_COLLECTION_NAME
             });
         } else {
             console.log('⚠️ RAG services not configured - missing OpenAI or Qdrant API keys');
         }
 
-        // Procesar RAG si es necesario y está disponible
-        const ragResult = ragService ? await processRAG(ragService, message) : { success: false, contexts: [] };
+        // ✅ MEJORADO: Procesar RAG con búsqueda inteligente
+        const ragResult = ragService ? await processEnhancedRAG(ragService, message) : {
+            success: false,
+            contexts: [],
+            metadata: { searchType: 'disabled' }
+        };
 
         // Formatear contexto para Claude
         const cvContext = ragResult.success && ragResult.contexts.length > 0 ?
@@ -80,12 +83,18 @@ export default async function handler(req, res) {
         // Extraer respuesta
         const responseText = claudeService.extractResponseText(claudeResponse);
 
-        // Preparar respuesta final
+        // ✅ MEJORADO: Respuesta con metadatos enriquecidos
         const response = {
             success: true,
             message: responseText,
             usedRAG: ragResult.success && ragResult.contexts.length > 0,
-            cvContextFound: cvContext !== null
+            cvContextFound: cvContext !== null,
+            ragMetadata: {
+                searchType: ragResult.metadata?.searchType || 'none',
+                chunkTypes: ragResult.metadata?.chunkTypes || [],
+                avgScore: ragResult.metadata?.avgScore || 0,
+                isFallback: ragResult.isFallback || false
+            }
         };
 
         // Añadir información de debug en desarrollo
@@ -94,7 +103,9 @@ export default async function handler(req, res) {
                 query: message,
                 contextsFound: ragResult.contexts.length,
                 avgScore: ragResult.metadata?.avgScore || 0,
-                isFallback: ragResult.isFallback || false
+                isFallback: ragResult.isFallback || false,
+                chunkTypes: ragResult.metadata?.chunkTypes || [],
+                searchMethod: ragResult.metadata?.searchType || 'standard'
             };
         }
 
@@ -111,7 +122,59 @@ export default async function handler(req, res) {
 }
 
 /**
- * Validar la estructura de la petición
+ * ✅ NUEVO: Procesamiento RAG mejorado con búsqueda inteligente
+ */
+async function processEnhancedRAG(ragService, message) {
+    console.log(`🔍 Analyzing message for enhanced RAG: "${message}"`);
+
+    try {
+        // Verificar si la consulta es sobre CV
+        if (!ragService.isAboutCV(message)) {
+            console.log('ℹ️ Message is not about CV, skipping RAG');
+            return {
+                success: false,
+                contexts: [],
+                metadata: { searchType: 'not_cv_related' }
+            };
+        }
+
+        console.log('🔍 CV-related query detected, activating enhanced RAG...');
+
+        // ✅ NUEVO: Usar búsqueda inteligente por intención
+        const ragResult = await ragService.searchByIntent(message);
+
+        if (ragResult.success) {
+            console.log(`✅ Enhanced RAG completed: ${ragResult.contexts.length} contexts found`);
+
+            if (ragResult.contexts.length > 0) {
+                const avgScore = ragResult.metadata?.avgScore || 0;
+                const chunkTypes = ragResult.metadata?.chunkTypes || [];
+
+                console.log(`📊 Average relevance score: ${(avgScore * 100).toFixed(1)}%`);
+                console.log(`🎯 Chunk types found: [${chunkTypes.join(', ')}]`);
+
+                // ✅ NUEVO: Añadir metadata de búsqueda
+                ragResult.metadata.searchType = 'intent_based';
+            }
+        } else {
+            console.log('ℹ️ Enhanced RAG search returned no results');
+        }
+
+        return ragResult;
+
+    } catch (error) {
+        console.warn('⚠️ Enhanced RAG error, continuing without CV context:', error.message);
+        return {
+            success: false,
+            contexts: [],
+            error: error.message,
+            metadata: { searchType: 'error' }
+        };
+    }
+}
+
+/**
+ * Validar la estructura de la petición (función existente mantenida)
  */
 function validateRequest(body) {
     if (!body) {
@@ -148,46 +211,7 @@ function validateRequest(body) {
 }
 
 /**
- * Procesar RAG si la consulta es relevante
- */
-async function processRAG(ragService, message) {
-    console.log(`🔍 Analyzing message for RAG: "${message}"`);
-
-    try {
-        // Verificar si la consulta es sobre CV
-        if (!ragService.isAboutCV(message)) {
-            console.log('ℹ️ Message is not about CV, skipping RAG');
-            return { success: false, contexts: [] };
-        }
-
-        console.log('🔍 CV-related query detected, activating RAG...');
-
-        const ragResult = await ragService.searchCVInformation(message);
-
-        if (ragResult.success) {
-            console.log(`✅ RAG completed: ${ragResult.contexts.length} contexts found`);
-            if (ragResult.contexts.length > 0) {
-                const avgScore = ragResult.metadata?.avgScore || 0;
-                console.log(`📊 Average relevance score: ${(avgScore * 100).toFixed(1)}%`);
-            }
-        } else {
-            console.log('ℹ️ RAG search returned no results');
-        }
-
-        return ragResult;
-
-    } catch (error) {
-        console.warn('⚠️ RAG error, continuing without CV context:', error.message);
-        return {
-            success: false,
-            contexts: [],
-            error: error.message
-        };
-    }
-}
-
-/**
- * Manejar errores y generar respuestas apropiadas
+ * Manejar errores y generar respuestas apropiadas (función existente mantenida)
  */
 function handleError(error, npcName) {
     console.error('📋 Error details:', {
