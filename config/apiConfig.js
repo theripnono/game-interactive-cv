@@ -2,7 +2,8 @@ import { ClaudeService, ClaudeApiError, NPCErrorMessages } from '../services/cla
 import { RAGService, createRAGService } from '../services/ragService.js';
 
 /**
- * Handler mejorado para el endpoint de Claude con RAG optimizado
+ * Handler principal para el endpoint de Claude
+ * Orquesta las llamadas a los servicios de Claude y RAG
  */
 export default async function handler(req, res) {
     // Configurar CORS
@@ -46,24 +47,14 @@ export default async function handler(req, res) {
         // Inicializar servicios
         const claudeService = new ClaudeService(process.env.ANTHROPIC_API_KEY);
 
-        // ✅ CAMBIO: Crear RAG service con colección mejorada
-        let ragService = null;
-        if (process.env.OPENAI_API_KEY && process.env.QDRANT_API_KEY2) {
-            ragService = await createRAGService(process.env.OPENAI_API_KEY, {
-                url: process.env.QDRANT_URL,
-                apiKey: process.env.QDRANT_API_KEY2,
-                collectionName: process.env.QDRANT_COLLECTION_NAME
-            });
-        } else {
-            console.log('⚠️ RAG services not configured - missing OpenAI or Qdrant API keys');
-        }
+        const ragService = createRAGService(process.env.OPENAI_API_KEY, {
+            url: procces.env.QDRANT_URL,
+            apiKey: process.env.QDRANT_API_KEY2,
+            collectionName: process.env.QDRANT_COLLECTION_NAME
+        });
 
-        // ✅ MEJORADO: Procesar RAG con búsqueda inteligente
-        const ragResult = ragService ? await processEnhancedRAG(ragService, message) : {
-            success: false,
-            contexts: [],
-            metadata: { searchType: 'disabled' }
-        };
+        // Procesar RAG si es necesario
+        const ragResult = await processRAG(ragService, message);
 
         // Formatear contexto para Claude
         const cvContext = ragResult.success && ragResult.contexts.length > 0 ?
@@ -83,18 +74,12 @@ export default async function handler(req, res) {
         // Extraer respuesta
         const responseText = claudeService.extractResponseText(claudeResponse);
 
-        // ✅ MEJORADO: Respuesta con metadatos enriquecidos
+        // Preparar respuesta final
         const response = {
             success: true,
             message: responseText,
             usedRAG: ragResult.success && ragResult.contexts.length > 0,
-            cvContextFound: cvContext !== null,
-            ragMetadata: {
-                searchType: ragResult.metadata?.searchType || 'none',
-                chunkTypes: ragResult.metadata?.chunkTypes || [],
-                avgScore: ragResult.metadata?.avgScore || 0,
-                isFallback: ragResult.isFallback || false
-            }
+            cvContextFound: cvContext !== null
         };
 
         // Añadir información de debug en desarrollo
@@ -103,9 +88,7 @@ export default async function handler(req, res) {
                 query: message,
                 contextsFound: ragResult.contexts.length,
                 avgScore: ragResult.metadata?.avgScore || 0,
-                isFallback: ragResult.isFallback || false,
-                chunkTypes: ragResult.metadata?.chunkTypes || [],
-                searchMethod: ragResult.metadata?.searchType || 'standard'
+                isFallback: ragResult.isFallback || false
             };
         }
 
@@ -116,94 +99,28 @@ export default async function handler(req, res) {
         console.error('❌ Handler error:', error.message);
         console.error('❌ Stack trace:', error.stack);
 
-        const errorResponse = handleError(error, req.body?.npcName || 'Unknown NPC');
+        const errorResponse = handleError(error, req.body.npcName);
         res.status(errorResponse.statusCode).json(errorResponse.body);
     }
 }
 
 /**
- * ✅ NUEVO: Procesamiento RAG mejorado con búsqueda inteligente
- */
-async function processEnhancedRAG(ragService, message) {
-    console.log(`🔍 Analyzing message for enhanced RAG: "${message}"`);
-
-    try {
-        // Verificar si la consulta es sobre CV
-        if (!ragService.isAboutCV(message)) {
-            console.log('ℹ️ Message is not about CV, skipping RAG');
-            return {
-                success: false,
-                contexts: [],
-                metadata: { searchType: 'not_cv_related' }
-            };
-        }
-
-        console.log('🔍 CV-related query detected, activating enhanced RAG...');
-
-        // ✅ NUEVO: Usar búsqueda inteligente por intención
-        const ragResult = await ragService.searchByIntent(message);
-
-        if (ragResult.success) {
-            console.log(`✅ Enhanced RAG completed: ${ragResult.contexts.length} contexts found`);
-
-            if (ragResult.contexts.length > 0) {
-                const avgScore = ragResult.metadata?.avgScore || 0;
-                const chunkTypes = ragResult.metadata?.chunkTypes || [];
-
-                console.log(`📊 Average relevance score: ${(avgScore * 100).toFixed(1)}%`);
-                console.log(`🎯 Chunk types found: [${chunkTypes.join(', ')}]`);
-
-                // ✅ NUEVO: Añadir metadata de búsqueda
-                ragResult.metadata.searchType = 'intent_based';
-            }
-        } else {
-            console.log('ℹ️ Enhanced RAG search returned no results');
-        }
-
-        return ragResult;
-
-    } catch (error) {
-        console.warn('⚠️ Enhanced RAG error, continuing without CV context:', error.message);
-        return {
-            success: false,
-            contexts: [],
-            error: error.message,
-            metadata: { searchType: 'error' }
-        };
-    }
-}
-
-/**
- * Validar la estructura de la petición (función existente mantenida)
+ * Validar la estructura de la petición
  */
 function validateRequest(body) {
-    if (!body) {
-        return {
-            isValid: false,
-            error: 'Request body is required'
-        };
-    }
-
     const { message, npcName, npcPersonality } = body;
 
-    if (!message || typeof message !== 'string') {
+    if (!message) {
         return {
             isValid: false,
-            error: 'Message is required and must be a string'
+            error: 'Message is required'
         };
     }
 
-    if (!npcName || typeof npcName !== 'string') {
+    if (!npcName || !npcPersonality) {
         return {
             isValid: false,
-            error: 'NPC name is required and must be a string'
-        };
-    }
-
-    if (!npcPersonality || typeof npcPersonality !== 'string') {
-        return {
-            isValid: false,
-            error: 'NPC personality is required and must be a string'
+            error: 'NPC information is required'
         };
     }
 
@@ -211,16 +128,48 @@ function validateRequest(body) {
 }
 
 /**
- * Manejar errores y generar respuestas apropiadas (función existente mantenida)
+ * Procesar RAG si la consulta es relevante
+ */
+async function processRAG(ragService, message) {
+    console.log(`🔍 Analyzing message for RAG: "${message}"`);
+
+    // Verificar si la consulta es sobre CV
+    if (!ragService.isAboutCV(message)) {
+        console.log('ℹ️ Message is not about CV, skipping RAG');
+        return { success: false, contexts: [] };
+    }
+
+    console.log('🔍 CV-related query detected, activating RAG...');
+
+    try {
+        const ragResult = await ragService.searchCVInformation(message);
+
+        if (ragResult.success) {
+            console.log(`✅ RAG completed: ${ragResult.contexts.length} contexts found`);
+            if (ragResult.contexts.length > 0) {
+                const avgScore = ragResult.metadata?.avgScore || 0;
+                console.log(`📊 Average relevance score: ${(avgScore * 100).toFixed(1)}%`);
+            }
+        } else {
+            console.log('ℹ️ RAG search returned no results');
+        }
+
+        return ragResult;
+
+    } catch (error) {
+        console.warn('⚠️ RAG error, continuing without CV context:', error.message);
+        return {
+            success: false,
+            contexts: [],
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Manejar errores y generar respuestas apropiadas
  */
 function handleError(error, npcName) {
-    console.error('📋 Error details:', {
-        name: error.name,
-        message: error.message,
-        code: error.code,
-        stack: error.stack?.substring(0, 500)
-    });
-
     // Error específico de Claude API sobrecargada
     if (error instanceof ClaudeApiError && error.code === 'API_OVERLOADED') {
         return {
@@ -259,7 +208,7 @@ function handleError(error, npcName) {
         };
     }
 
-    // Error genérico con mensaje personalizado por NPC
+    // Error genérico
     const errorMessage = NPCErrorMessages.getErrorMessage(npcName);
 
     return {
@@ -267,7 +216,87 @@ function handleError(error, npcName) {
         body: {
             success: false,
             message: errorMessage,
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         }
     };
+}
+
+/**
+ * Middleware para rate limiting (opcional)
+ */
+export function createRateLimiter() {
+    const requests = new Map();
+    const WINDOW_MS = 60 * 1000; // 1 minuto
+    const MAX_REQUESTS = 30; // máximo 30 requests por minuto por IP
+
+    return (req, res, next) => {
+        const ip = req.ip || req.connection.remoteAddress;
+        const now = Date.now();
+
+        if (!requests.has(ip)) {
+            requests.set(ip, []);
+        }
+
+        const userRequests = requests.get(ip);
+        const validRequests = userRequests.filter(time => now - time < WINDOW_MS);
+
+        if (validRequests.length >= MAX_REQUESTS) {
+            return res.status(429).json({
+                success: false,
+                message: 'Too many requests. Try again later.',
+                retryAfter: Math.ceil(WINDOW_MS / 1000)
+            });
+        }
+
+        validRequests.push(now);
+        requests.set(ip, validRequests);
+
+        next();
+    };
+}
+
+/**
+ * Circuit breaker para mayor resiliencia
+ */
+export class CircuitBreaker {
+    constructor(threshold = 5, timeout = 60000) {
+        this.failureThreshold = threshold;
+        this.timeout = timeout;
+        this.failureCount = 0;
+        this.lastFailureTime = null;
+        this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
+    }
+
+    async call(fn) {
+        if (this.state === 'OPEN') {
+            if (Date.now() - this.lastFailureTime > this.timeout) {
+                this.state = 'HALF_OPEN';
+            } else {
+                throw new Error('Circuit breaker is OPEN - too many recent failures');
+            }
+        }
+
+        try {
+            const result = await fn();
+            this.onSuccess();
+            return result;
+        } catch (error) {
+            this.onFailure();
+            throw error;
+        }
+    }
+
+    onSuccess() {
+        this.failureCount = 0;
+        this.state = 'CLOSED';
+    }
+
+    onFailure() {
+        this.failureCount++;
+        this.lastFailureTime = Date.now();
+
+        if (this.failureCount >= this.failureThreshold) {
+            this.state = 'OPEN';
+        }
+    }
 }
