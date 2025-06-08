@@ -28,8 +28,8 @@ function startMainMusic() {
     try {
 
         backgroundMusic = new Audio(MUSIC_FILES.main);
-        backgroundMusic.loop = true; // ✅ Música principal SÍ en loop
-        backgroundMusic.volume = 0.3;
+        backgroundMusic.loop = true;
+        backgroundMusic.volume = 0.1;
         backgroundMusic.preload = 'auto';
 
         // Event listeners para la música principal
@@ -74,7 +74,7 @@ function playNPCSound(trackKey) {
         // Crear nueva instancia para el sonido del NPC
         npcMusic = new Audio(MUSIC_FILES[trackKey]);
         npcMusic.loop = false; // ⭐ CLAVE: NO loop, solo una vez
-        npcMusic.volume = 0.4; // Volumen del sonido del animal
+        npcMusic.volume = 0.1; // Volumen del sonido del animal
         npcMusic.preload = 'auto';
 
         // Event listeners para sonido NPC
@@ -393,7 +393,7 @@ function createMusicToggleButton() {
         height: 50px;
         border: none;
         border-radius: 50%;
-        background: rgba(0, 0, 0, 0.7);
+        background: yellowgreen;
         color: white;
         font-size: 20px;
         cursor: pointer;
@@ -408,21 +408,28 @@ function createMusicToggleButton() {
 
     // Efectos hover y active
     button.addEventListener('mouseenter', () => {
-        button.style.background = 'rgba(0, 0, 0, 0.9)';
+        // Mantener el verde pero más brillante/saturado
+        button.style.background = 'rgba(154, 205, 50, 0.9)'; // yellowgreen con transparencia
+        // O usar un verde más brillante:
+        // button.style.background = '#9ACD32'; // yellowgreen más brillante
         button.style.transform = 'scale(1.1)';
     });
 
     button.addEventListener('mouseleave', () => {
-        button.style.background = 'rgba(0, 0, 0, 0.7)';
+        // Volver al color original
+        button.style.background = 'yellowgreen';
         button.style.transform = 'scale(1)';
     });
 
-    button.addEventListener('mousedown', () => {
-        button.style.transform = 'scale(0.95)';
+    // Alternativa usando colores HSL para mejor control
+    button.addEventListener('mouseenter', () => {
+        button.style.background = 'hsl(83, 60%, 55%)'; // Verde más brillante
+        button.style.transform = 'scale(1.1)';
     });
 
-    button.addEventListener('mouseup', () => {
-        button.style.transform = 'scale(1.1)';
+    button.addEventListener('mouseleave', () => {
+        button.style.background = 'hsl(83, 60%, 50%)'; // Verde original
+        button.style.transform = 'scale(1)';
     });
 
     // Funcionalidad del botón
